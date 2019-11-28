@@ -10,8 +10,8 @@ RM := rm -rf
 -include sources.mk
 -include startup/subdir.mk
 -include src/subdir.mk
+-include Utilities/STM32F1xx-Nucleo/subdir.mk
 -include StdPeriph_Driver/src/subdir.mk
--include CMSIS/core/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -32,10 +32,10 @@ endif
 all: 3SO.elf
 
 # Tool invocations
-3SO.elf: $(OBJS) $(USER_OBJS) /Users/prado/Documents/ARM/3SO/LinkerScript.ld
+3SO.elf: $(OBJS) $(USER_OBJS) /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/LinkerScript.ld
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -T"/Users/prado/Documents/ARM/3SO/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "3SO.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
+	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -T"/Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "3SO.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build

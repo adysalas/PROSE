@@ -15,8 +15,8 @@ C_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-CMSIS/core \
 StdPeriph_Driver/src \
+Utilities/STM32F1xx-Nucleo \
 src \
 startup \
 
