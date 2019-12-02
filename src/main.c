@@ -17,6 +17,8 @@
 int main(void)
 {
 
+//#define RELEASES
+
 	RCC_Config_HSI_PLL_64MHz();
 	Config_USART2();
 	Config_Pin_General();
@@ -24,9 +26,23 @@ int main(void)
 	lcd_init();
 	rcc_lcd_info();
 
+#ifndef RELEASE
+	//Struct of CAN transmiter
+	// FOR DEBUG OBJECTIVE..
+	// REMOVE ON RELEASE
+	stCanTx.StdId=0x000;
+	stCanTx.ExtId=0x00000000;
+	strcpy(stCanTx.Data,"");
+	stCanTx.DLC = 0x08;
+	stCanTx.IDE = CAN_Id_Standard;
+	stCanTx.RTR = CAN_RTR_Data;
+#endif
     /* Infinite loop */
     for(;;)
     {
+#ifndef RELEASE
+    	CAN_Transmit(CAN1, &stCanTx);
+#endif
     	StateMachine_Sensors();
     }
 }

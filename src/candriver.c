@@ -92,6 +92,31 @@ void Config_CAN()
 }
 
 
+void USB_LP_CAN1_RX0_IRQHandler(void)
+{
+	//CanRxMsg rec;
+	GPIO_WriteBit(GPIOB, GPIO_Pin_2, (1-GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_2)));
+
+	CAN_Receive(CAN1, CAN_FIFO0, &stCanRx);
+
+	//can_New=1;
+//	//if ((RxMessage.StdId == 0x321)&&(RxMessage.IDE == CAN_ID_STD)&&(RxMessage.DLC == 8)&&(RxMessage.Data[0] == 'A'))
+//	lcd_draw_string( 17, 10, "From CAN", 0xFA, 2 );
+//	lcd_draw_string( 40, 30+increm, "        ", 0xFD0 , 1 );
+//	if(receber.DLC==(uint8_t)8)
+//		lcd_draw_string( 40, 30+increm, receber.Data, 0xFD0, 1 );
+//	else
+//		for(uint8_t x=0 ; x<receber.DLC ; x++)
+//			lcd_draw_char( 40+x*6, 30+increm, receber.Data[x], 0xFD0 , 1 );
+//
+//	lcd_draw_string( 40, 40+increm, "---end--", 0xFD0 , 1 );
+//	increm=increm+10;
+//
+//	if(increm>=130)
+//		increm=0;
+}
+
+
 static void Config_Can_PinOut()
 {
 	/**
