@@ -27,7 +27,10 @@ src/main.o: ../src/main.c \
  /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/StdPeriph_Driver/inc/stm32f10x_tim.h \
  /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/StdPeriph_Driver/inc/stm32f10x_usart.h \
  /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/StdPeriph_Driver/inc/stm32f10x_wwdg.h \
- /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/StdPeriph_Driver/inc/misc.h
+ /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/StdPeriph_Driver/inc/misc.h \
+ /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/inc/candriver.h \
+ /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/inc/lcd.h \
+ /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/inc/main.h
 
 /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/CMSIS/device/stm32f10x.h:
 
@@ -86,3 +89,9 @@ src/main.o: ../src/main.c \
 /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/StdPeriph_Driver/inc/stm32f10x_wwdg.h:
 
 /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/StdPeriph_Driver/inc/misc.h:
+
+/Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/inc/candriver.h:
+
+/Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/inc/lcd.h:
+
+/Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/inc/main.h:

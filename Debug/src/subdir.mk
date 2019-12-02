@@ -4,25 +4,25 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/candriver.c \
 ../src/lcd.c \
 ../src/main.c \
-../src/semana2.c \
 ../src/stm32f10x_it.c \
 ../src/syscalls.c \
 ../src/system_stm32f10x.c 
 
 OBJS += \
+./src/candriver.o \
 ./src/lcd.o \
 ./src/main.o \
-./src/semana2.o \
 ./src/stm32f10x_it.o \
 ./src/syscalls.o \
 ./src/system_stm32f10x.o 
 
 C_DEPS += \
+./src/candriver.d \
 ./src/lcd.d \
 ./src/main.d \
-./src/semana2.d \
 ./src/stm32f10x_it.d \
 ./src/syscalls.d \
 ./src/system_stm32f10x.d 
