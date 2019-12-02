@@ -20,7 +20,8 @@ CAN_InitTypeDef CAN_InitStructure;
 /**
  * Declaration Of Global Variables
  */
-
+CanTxMsg stCanTx;
+CanRxMsg stCanRx;
 
 void Config_CAN()
 {

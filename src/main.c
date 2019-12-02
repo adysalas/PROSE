@@ -10,6 +10,8 @@
 #include <stdint.h>
 #include "lcd.h"
 #include "main.h"
+#include "stm32f10x_can.h"
+#include "system.h"
 
 
 int main(void)
@@ -25,7 +27,7 @@ int main(void)
     /* Infinite loop */
     for(;;)
     {
-
+    	StateMachine_Sensors();
     }
 }
 

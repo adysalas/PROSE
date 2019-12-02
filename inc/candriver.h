@@ -10,6 +10,12 @@
 
 
 
+/**
+ * Extern values
+ */
+
+extern CanTxMsg stCanTx;
+extern CanRxMsg stCanRx;
 
 void Config_CAN(void);
 

@@ -9,6 +9,7 @@ C_SRCS += \
 ../src/main.c \
 ../src/stm32f10x_it.c \
 ../src/syscalls.c \
+../src/system.c \
 ../src/system_stm32f10x.c 
 
 OBJS += \
@@ -17,6 +18,7 @@ OBJS += \
 ./src/main.o \
 ./src/stm32f10x_it.o \
 ./src/syscalls.o \
+./src/system.o \
 ./src/system_stm32f10x.o 
 
 C_DEPS += \
@@ -25,6 +27,7 @@ C_DEPS += \
 ./src/main.d \
 ./src/stm32f10x_it.d \
 ./src/syscalls.d \
+./src/system.d \
 ./src/system_stm32f10x.d 
 
 
