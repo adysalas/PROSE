@@ -11,8 +11,12 @@
 
 typedef enum
 {
-    INIT = 0,
+    INIT = 1,
 } states;
+
+#define bool int
+#define TRUE 	(1)
+#define FALSE 	(0)
 
 void StateMachine_Sensors(void);
 
