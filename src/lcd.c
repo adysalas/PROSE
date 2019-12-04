@@ -274,13 +274,7 @@ const uint8_t width = 128;
 const uint8_t height = 160;
 uint8_t madctl;
 uint8_t lcd_initialized=0;
-uint16_t background_color = color_black;
 
-
-void set_background_color ( uint16_t color )
-{
-	background_color = color;
-}
 
 
 void lcd_delay_pool(uint16_t time2delay)
@@ -291,15 +285,6 @@ void lcd_delay_pool(uint16_t time2delay)
 }
 
 
-void lcd_backligth_on( void)
-{
-	GPIO_WriteBit(GPIOA, GPIO_Pin_0, Bit_SET);
-}
-
-void lcd_backlight_off( void )
-{
-	GPIO_WriteBit(GPIOA, GPIO_Pin_0, Bit_RESET);
-}
 
 void lcd_init ( void )
 {
@@ -453,8 +438,8 @@ void lcd_init ( void )
 		lcd_send_commnad(ST7735_INVOFF);    // don't invert display
 
 		lcd_send_commnad(ST7735_MADCTL);  // memory access control (directions)
-		lcd_send_data(0xC0);  // row address/col address, bottom to top refresh
-		madctl = 0xC0;
+		lcd_send_data(0xC8);  // row address/col address, bottom to top refresh
+		madctl = 0xC8;
 
 		lcd_send_commnad(ST7735_COLMOD);  // set color mode
 		lcd_send_data(0x05);        // 16-bit color
@@ -729,19 +714,24 @@ void lcd_draw_char(uint8_t x, uint8_t y, unsigned char c, uint16_t color, uint8_
 
 	//lcd_setAddrWindow(x,y,x+10,y+16);
 
-	 for(int8_t i=0; i<6; i++ ) {
-	      uint8_t line;
-	      if(i < 5) line = (uint8_t) font[(c*5)+i];
-	      else      line = 0x0;
-	      for(int8_t j=0; j<8; j++, line >>= 1) {
-	        if(line & 0x1) {
-	          if(size == 1) lcd_draw_pixelFromChar(x+i, y+j, color);
-	          else          lcd_draw_fillrect(x+i*size, y+j*size, size, size, color);
-	        } else /*if(0x0000 != color)*/ {
-	          if(size == 1) lcd_draw_pixelFromChar(x+i, y+j, background_color);
-	          else          lcd_draw_fillrect(x+i*size, y+j*size, size, size, background_color);
-	        }
-	      }
+	for (i =0; i<5; i++ )
+	{
+		line =  (uint8_t) font[(c*5)+i];
+		for (j = 0; j<8; j++)
+		{
+			if ( (line >> j ) & 0x1 )
+			{
+				if (size == 1) // default size
+					lcd_draw_pixelFromChar(x+i, y+j, color);
+				else
+				{  // big size
+					lcd_draw_fillrect(x+i*size, y+j*size, size, size, color);
+				}
+			}
+			else
+				lcd_draw_pixel(x+i, y+j, 0x0000);
+			//line >>= 1;
+		}
 	}
 }
 

@@ -25,8 +25,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -98,7 +98,7 @@ LoopFillZerobss:
 	bcc	FillZerobss
 
 /* Call the clock system intitialization function.*/
-    bl  SystemInit
+/* 	bl  SystemInit */
 /* Call static constructors */
     bl __libc_init_array
 /* Call the application's entry point.*/
@@ -191,7 +191,7 @@ g_pfnVectors:
 	.word	EXTI15_10_IRQHandler
 	.word	RTCAlarm_IRQHandler
 	.word	USBWakeUp_IRQHandler
-  .word	0
+  	.word	0
 	.word	0
 	.word	0
 	.word	0
@@ -366,4 +366,3 @@ g_pfnVectors:
 	.thumb_set USBWakeUp_IRQHandler,Default_Handler
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-

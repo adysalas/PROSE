@@ -341,9 +341,9 @@ void ADC1_2_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void USB_HP_CAN_TX_IRQHandler(void)
-{
-}
+//void USB_HP_CAN_TX_IRQHandler(void)
+//{
+//}
 
 /*******************************************************************************
 * Function Name  : USB_LP_CAN_RX0_IRQHandler
@@ -353,9 +353,9 @@ void USB_HP_CAN_TX_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void USB_LP_CAN_RX0_IRQHandler(void)
-{
-}
+//void USB_LP_CAN_RX0_IRQHandler(void)
+//{
+//}
 
 /*******************************************************************************
 * Function Name  : CAN_RX1_IRQHandler
@@ -364,9 +364,9 @@ void USB_LP_CAN_RX0_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void CAN_RX1_IRQHandler(void)
-{
-}
+//void CAN_RX1_IRQHandler(void)
+//{
+//}
 
 /*******************************************************************************
 * Function Name  : CAN_SCE_IRQHandler
@@ -375,9 +375,9 @@ void CAN_RX1_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void CAN_SCE_IRQHandler(void)
-{
-}
+//void CAN_SCE_IRQHandler(void)
+//{
+//}
 
 /*******************************************************************************
 * Function Name  : EXTI9_5_IRQHandler
@@ -454,9 +454,9 @@ void TIM2_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void TIM3_IRQHandler(void)
-{
-}
+//void TIM3_IRQHandler(void)
+//{
+//}
 
 /*******************************************************************************
 * Function Name  : TIM4_IRQHandler
@@ -553,9 +553,9 @@ void USART1_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void USART2_IRQHandler(void)
-{
-}
+//void USART2_IRQHandler(void)
+//{
+//}
 
 /*******************************************************************************
 * Function Name  : USART3_IRQHandler
@@ -564,9 +564,9 @@ void USART2_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void USART3_IRQHandler(void)
-{
-}
+//void USART3_IRQHandler(void)
+//{
+//}
 
 /*******************************************************************************
 * Function Name  : EXTI15_10_IRQHandler

@@ -1,8 +1,0 @@
-# Pastas especificas de compilacion en el sistema.
-
-Debug/
-.settings/
-.cproject
-.cproject
-.custom.cfg
-Debug.cfg

@@ -10,8 +10,8 @@ RM := rm -rf
 -include sources.mk
 -include startup/subdir.mk
 -include src/subdir.mk
--include Utilities/STM32F1xx-Nucleo/subdir.mk
 -include StdPeriph_Driver/src/subdir.mk
+-include CMSIS/core/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -29,13 +29,13 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: 3SO.elf
+all: test.elf
 
 # Tool invocations
-3SO.elf: $(OBJS) $(USER_OBJS) /Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/LinkerScript.ld
+test.elf: $(OBJS) $(USER_OBJS) C:\Users\gonca\Documents\ISEP\Mestrado\2.º\ Ano\PROSE\PROSE/LinkerScript.ld
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -T"/Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "3SO.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
+	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -T"C:/Users/gonca/Documents/ISEP/Mestrado/2.º Ano/PROSE/PROSE/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "test.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build
@@ -47,8 +47,8 @@ clean:
 
 post-build:
 	-@echo 'Generating binary and Printing size information:'
-	arm-none-eabi-objcopy -O binary "3SO.elf" "3SO.bin"
-	arm-none-eabi-size "3SO.elf"
+	arm-none-eabi-objcopy -O binary "test.elf" "test.bin"
+	arm-none-eabi-size "test.elf"
 	-@echo ' '
 
 .PHONY: all clean dependents

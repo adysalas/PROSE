@@ -1,148 +1,15 @@
-/*
- * Team Members:
- * 		Ady Salas (1180092)
-*		Ricardo Fernandes (1180099)
- *
- */
-
 #include "stm32f10x.h"
-#include "candriver.h"
-#include <stdint.h>
-#include "lcd.h"
-#include "main.h"
 #include "stm32f10x_can.h"
-#include "system.h"
+#include "lcd.h"
+#include "time.h"
 
-
-int main(void)
-{
-
-//#define RELEASES
-
-	RCC_Config_HSI_PLL_64MHz();
-	Config_USART2();
-	Config_Pin_General();
-	Config_CAN();
-	lcd_init();
-	rcc_lcd_info();
-
-#ifndef RELEASE
-	//Struct of CAN transmiter
-	// FOR DEBUG OBJECTIVE..
-	// REMOVE ON RELEASE
-	stCanTx.StdId=0x000;
-	stCanTx.ExtId=0x00000000;
-	strcpy(stCanTx.Data,"");
-	stCanTx.DLC = 0x08;
-	stCanTx.IDE = CAN_Id_Standard;
-	stCanTx.RTR = CAN_RTR_Data;
-#endif
-    /* Infinite loop */
-    for(;;)
-    {
-#ifndef RELEASE
-    	CAN_Transmit(CAN1, &stCanTx);
-#endif
-    	StateMachine_Sensors();
-    }
-}
-
-
-
-void Config_USART2()
-{
-	USART_InitTypeDef USART_InitStructure;
-	GPIO_InitTypeDef GPIO_InitStructure;
-
-	/* USART2 is configured as follow:
-		- BaudRate = 115200 baud
-		- Word Length = 8 Bits
-		- 1 Stop Bit
-		- No parity
-		- Hardware flow control disabled (RTS and CTS signals)
-		- Receive and transmit enabled */
-
-	/* Enable GPIOA clock */
-	RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA , ENABLE );
-
-	/* USART Periph clock enable */
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_2;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_3;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-
-	USART_InitStructure.USART_BaudRate = 115200;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-
-	/* Configure the USART2 */
-	USART_Init(USART2, &USART_InitStructure);
-	/* Enable the USART2 */
-	USART_Cmd(USART2, ENABLE);
-
-	//Interrupcao_USART
-	NVIC_InitTypeDef NVIC_UART2;
-
-	NVIC_UART2.NVIC_IRQChannel = USART2_IRQn;
-	NVIC_UART2.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_UART2.NVIC_IRQChannelSubPriority = 1;
-	NVIC_UART2.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_UART2);
-
-	USART_ITConfig(USART2,USART_IT_RXNE,ENABLE);
-}
-
-void USART_SendString2(char *message)
-{
-uint16_t cont_aux=0;
-
-    while(cont_aux != strlen(message))
-    {
-        USART_SendData(USART2, (uint8_t) message[cont_aux]);
-        while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET)
-        {
-        }
-        cont_aux++;
-    }
-}
-
-void Config_Pin_General()
-{
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-
-	//LED_B0, LED_B1 e LED_B2
-	//Inicializar variavel
-	GPIO_InitTypeDef GPIO_B;
-	//Configurar variavel
-	GPIO_B.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2;
-	GPIO_B.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_B.GPIO_Mode = GPIO_Mode_Out_PP;
-	//Atualizar Porto
-	GPIO_Init(GPIOB, &GPIO_B);
-	GPIO_WriteBit(GPIOB, GPIO_Pin_0, DISABLE);
-	GPIO_WriteBit(GPIOB, GPIO_Pin_1, DISABLE);
-	GPIO_WriteBit(GPIOB, GPIO_Pin_2, DISABLE);
-
-}
+char buff[30];
+uint16_t ADC1_Addr[8];
 
 void RCC_Config_HSI_PLL_64MHz() //HSI com PLL a frequencia maxima
 {
-	//Reset ï¿½s configuracï¿½es
-	RCC_DeInit(); //Faz reset ao sistema e coloca a configuraccao por omissï¿½o
+	//Reset às configuracões
+	RCC_DeInit(); //Faz reset ao sistema e coloca a configuraccao por omissão
 
 	//Ativar Fonte
 	RCC_HSICmd(ENABLE); //Ativar a HSI
@@ -154,7 +21,7 @@ void RCC_Config_HSI_PLL_64MHz() //HSI com PLL a frequencia maxima
 	FLASH_SetLatency(FLASH_Latency_2);
 
 	//Configurar os prescalers AHB, APB1 e APB2, respetivamente
-	RCC_HCLKConfig(RCC_SYSCLK_Div1);//divisor unitario que ï¿½ o divisor mais baixo possivel
+	RCC_HCLKConfig(RCC_SYSCLK_Div1);//divisor unitario que é o divisor mais baixo possivel
 	RCC_PCLK1Config(RCC_HCLK_Div2); //PCLK1 no valor maximo possivel, ou seja, colocar o divisor minimo possivel
 	RCC_PCLK2Config(RCC_HCLK_Div1); //PCLK2 no valor maximo possivel, ou seja, colocar o divisor minimo possivel
 
@@ -173,4 +40,161 @@ void RCC_Config_HSI_PLL_64MHz() //HSI com PLL a frequencia maxima
 	//Aguardar que a fonte estabilize
 	while(RCC_GetSYSCLKSource() != 0x08); //Esperar que a fonte PLL(0x08) estabilize
 
+}
+
+void Init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;					//tx
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;					//rx
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+
+    //USART CONFIG
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_Init(&NVIC_InitStructure);
+	USART_InitTypeDef USART_InitStructure;
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+
+	USART_InitStructure.USART_BaudRate = 9600;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+
+	USART_Init(USART2, &USART_InitStructure);
+
+	USART_Cmd(USART2, ENABLE);
+
+	CAN_init();
+
+}
+
+void CAN_init(void)
+{
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO , ENABLE);
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_12; //tx with can1
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_11; //rx with can1
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	CAN_DeInit(CAN1); //reset can
+	//////////////////////////////////////////////////////////////////////////init/////////////////////////////////////////////////////////////////////////
+	CAN_InitTypeDef CAN_InitStructure;
+
+	CAN_InitStructure.CAN_TTCM = DISABLE;
+	CAN_InitStructure.CAN_ABOM = DISABLE;
+	CAN_InitStructure.CAN_AWUM = DISABLE;
+	CAN_InitStructure.CAN_NART = DISABLE;
+	CAN_InitStructure.CAN_RFLM = DISABLE;
+	CAN_InitStructure.CAN_TXFP = DISABLE;
+	CAN_InitStructure.CAN_Mode = CAN_Mode_Normal;
+	CAN_InitStructure.CAN_SJW = CAN_SJW_1tq;
+	CAN_InitStructure.CAN_BS1 = CAN_BS1_13tq;			//configuration to 1Mb/s
+	CAN_InitStructure.CAN_BS2 = CAN_BS2_2tq;
+	CAN_InitStructure.CAN_Prescaler = 2;
+
+
+	///////////////////////////////////////////////////////////////////////filter/////////////////////////////////////////////////////////////////////////
+	CAN_FilterInitTypeDef CAN_FilterInitStructure;
+
+	CAN_FilterInitStructure.CAN_FilterNumber = 0;
+	CAN_FilterInitStructure.CAN_FilterMode = CAN_FilterMode_IdMask;
+	CAN_FilterInitStructure.CAN_FilterScale = CAN_FilterScale_16bit;
+	CAN_FilterInitStructure.CAN_FilterIdHigh = 0x0000;
+	CAN_FilterInitStructure.CAN_FilterIdLow = 0x0000;
+	CAN_FilterInitStructure.CAN_FilterMaskIdHigh = 0x0000;
+	CAN_FilterInitStructure.CAN_FilterMaskIdLow = 0x0000;
+	CAN_FilterInitStructure.CAN_FilterFIFOAssignment = CAN_FilterFIFO0;
+	CAN_FilterInitStructure.CAN_FilterActivation = ENABLE;
+
+	CAN_FilterInit(&CAN_FilterInitStructure);
+	CAN_Init(CAN1, &CAN_InitStructure);
+}
+
+void read_adc(void)
+{
+	//read_values_from_ADC_pins
+	ADC_SoftwareStartConvCmd ( ADC1 , ENABLE );
+	while(!DMA_GetFlagStatus(DMA1_FLAG_TC1));
+	DMA_ClearFlag(DMA1_FLAG_TC1);
+	DMA_ClearFlag(DMA1_FLAG_TC1);
+}
+
+void display(void)
+{
+
+	for(int i=0; i<8;i++)
+	{
+		sprintf(buff,"%d e %d \r\n",i,ADC1_Addr[i]);
+		for(int a=0; buff[a]!='\0';a++)
+		{
+			while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+			USART_SendData(USART2, buff[a]);
+			USART_ClearFlag(USART2,USART_FLAG_TXE);
+		}
+	}
+}
+
+void can_send()
+{
+	/* Send a message with the CAN */
+	CanTxMsg TxMessage;
+	TxMessage.StdId = 0x01;			//identifier
+	TxMessage.ExtId = 0x00;			//extended identifier
+	TxMessage.IDE = CAN_ID_STD;		//type of identifier
+	TxMessage.RTR = CAN_RTR_DATA;	//type of frame for message
+	TxMessage.DLC = 8;				//length of frame
+	TxMessage.Data[0] = 0x01;		//information to be transmitted, size of vector->8
+	TxMessage.Data[1] = 0x01;
+	TxMessage.Data[2] = 0x01;
+	TxMessage.Data[3] = 0x01;
+	TxMessage.Data[4] = 0x01;
+	TxMessage.Data[5] = 0x01;
+	TxMessage.Data[6] = 0x01;
+	TxMessage.Data[7] = 0x01;
+	CAN_Transmit(CAN1, &TxMessage);		//send information
+
+}
+
+void can_recieve()
+{
+	CanRxMsg RxMessage;
+	CAN_Receive(CAN1, 0 ,&RxMessage);
+}
+
+int main(void)
+{
+	RCC_Config_HSI_PLL_64MHz();
+	Init();
+	lcd_init();
+	rcc_lcd_info();
+	while(1)
+		{
+		//read_adc();
+		//can_recieve();
+		//can_send();
+		//can_send();
+		display();
+
+		}
 }

@@ -4,31 +4,22 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/candriver.c \
 ../src/lcd.c \
 ../src/main.c \
 ../src/stm32f10x_it.c \
-../src/syscalls.c \
-../src/system.c \
-../src/system_stm32f10x.c 
+../src/syscalls.c 
 
 OBJS += \
-./src/candriver.o \
 ./src/lcd.o \
 ./src/main.o \
 ./src/stm32f10x_it.o \
-./src/syscalls.o \
-./src/system.o \
-./src/system_stm32f10x.o 
+./src/syscalls.o 
 
 C_DEPS += \
-./src/candriver.d \
 ./src/lcd.d \
 ./src/main.d \
 ./src/stm32f10x_it.d \
-./src/syscalls.d \
-./src/system.d \
-./src/system_stm32f10x.d 
+./src/syscalls.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -36,7 +27,7 @@ src/%.o: ../src/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo $(PWD)
-	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -DSTM32 -DSTM32F1 -DSTM32F103RBTx -DNUCLEO_F103RB -DDEBUG -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -I"/Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/Utilities/STM32F1xx-Nucleo" -I"/Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/StdPeriph_Driver/inc" -I"/Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/inc" -I"/Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/CMSIS/device" -I"/Users/Saldory/Dropbox/Maestrado/PROSE/PROSE/CMSIS/core" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -DSTM32F1 -DSTM32F103RBTx -DSTM32 -DDEBUG -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -I"C:/Users/gonca/Documents/ISEP/Mestrado/2.º Ano/PROSE/PROSE/inc" -I"C:/Users/gonca/Documents/ISEP/Mestrado/2.º Ano/PROSE/PROSE/StdPeriph_Driver/inc" -I"C:/Users/gonca/Documents/ISEP/Mestrado/2.º Ano/PROSE/PROSE/CMSIS/core" -I"C:/Users/gonca/Documents/ISEP/Mestrado/2.º Ano/PROSE/PROSE/CMSIS/device" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

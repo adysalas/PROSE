@@ -10,9 +10,8 @@
 ]>
 
 <targetDefinitions>
-  <board id="nucleo-f103rb">
-    <name>NUCLEO-F103RB</name>
-    <dbgIF>JTAG</dbgIF>
+  <board id="3so">
+    <name>3SO</name>
     <dbgIF>SWD</dbgIF>
     <dbgDEV>ST-Link</dbgDEV>
     <mcuId>stm32f103rbtx</mcuId>
