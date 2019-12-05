@@ -8,8 +8,8 @@ uint16_t ADC1_Addr[8];
 
 void RCC_Config_HSI_PLL_64MHz() //HSI com PLL a frequencia maxima
 {
-	//Reset às configuracões
-	RCC_DeInit(); //Faz reset ao sistema e coloca a configuraccao por omissão
+	//Reset ï¿½s configuracï¿½es
+	RCC_DeInit(); //Faz reset ao sistema e coloca a configuraccao por omissï¿½o
 
 	//Ativar Fonte
 	RCC_HSICmd(ENABLE); //Ativar a HSI
@@ -21,7 +21,7 @@ void RCC_Config_HSI_PLL_64MHz() //HSI com PLL a frequencia maxima
 	FLASH_SetLatency(FLASH_Latency_2);
 
 	//Configurar os prescalers AHB, APB1 e APB2, respetivamente
-	RCC_HCLKConfig(RCC_SYSCLK_Div1);//divisor unitario que é o divisor mais baixo possivel
+	RCC_HCLKConfig(RCC_SYSCLK_Div1);//divisor unitario que ï¿½ o divisor mais baixo possivel
 	RCC_PCLK1Config(RCC_HCLK_Div2); //PCLK1 no valor maximo possivel, ou seja, colocar o divisor minimo possivel
 	RCC_PCLK2Config(RCC_HCLK_Div1); //PCLK2 no valor maximo possivel, ou seja, colocar o divisor minimo possivel
 
@@ -189,12 +189,11 @@ int main(void)
 	lcd_init();
 	rcc_lcd_info();
 	while(1)
-		{
+	{
 		//read_adc();
 		//can_recieve();
 		//can_send();
 		//can_send();
 		display();
-
-		}
+	}
 }
