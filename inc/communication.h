@@ -24,6 +24,11 @@ typedef struct ring{
 }rings;
 
 
+typedef enum{
+		REQUEST = 1,
+		SEND = 0
+		}state ;
+
 /**
  * Declaration of Extern Variables.
  */
