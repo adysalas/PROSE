@@ -17,6 +17,8 @@
 #define RING4_ID (0x04)
 #define RING5_ID (0x05)
 
+#define TRUE (1u)
+#define FALSE (0u)
 
 typedef struct ring{
 	float sensor_lux[8];
@@ -25,9 +27,12 @@ typedef struct ring{
 
 
 typedef enum{
-		REQUEST = 1,
-		SEND = 0
-		}state ;
+		RING_1 = 0,
+		RING_2,
+		RING_3,
+		RING_4,
+		RING_5
+		}states ;
 
 /**
  * Declaration of Extern Variables.
