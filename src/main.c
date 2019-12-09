@@ -5,11 +5,43 @@
 
 char buff[30];
 uint16_t ADC1_Addr[8];
+int a = 1;
+char group = 1;
+
+CanTxMsg TxMessage;
+CanRxMsg RxMessage;
+
+float roll;		/* Body roll */
+float pitch;	/* Body pitch */
+
+int state = 0;	/* State of state machine */
+
+clock_t tic, toc;
+
+/* State machine states defines */
+#define STATE_FIRST_RUN 0
+#define STATE_REQUEST_SENSOR_DATA 1
+
+/* Ring IDs defines */
+#define RING1_ID 0x01
+#define RING2_ID 0x02
+#define RING3_ID 0x02
+#define RING4_ID 0x04
+#define RING5_ID 0x05
+
+/* Other defines */
+#define MAX_CAN_TRANSMIT_ATTEMPTS 3;
+
+struct ring {
+	float sensor_lux[8];
+	float roll;
+} ring1, ring2, ring3, ring4, ring5;
+
 
 void RCC_Config_HSI_PLL_64MHz() //HSI com PLL a frequencia maxima
 {
-	//Reset �s configurac�es
-	RCC_DeInit(); //Faz reset ao sistema e coloca a configuraccao por omiss�o
+	//Reset às configuracões
+	RCC_DeInit(); //Faz reset ao sistema e coloca a configuraccao por omissão
 
 	//Ativar Fonte
 	RCC_HSICmd(ENABLE); //Ativar a HSI
@@ -21,7 +53,7 @@ void RCC_Config_HSI_PLL_64MHz() //HSI com PLL a frequencia maxima
 	FLASH_SetLatency(FLASH_Latency_2);
 
 	//Configurar os prescalers AHB, APB1 e APB2, respetivamente
-	RCC_HCLKConfig(RCC_SYSCLK_Div1);//divisor unitario que � o divisor mais baixo possivel
+	RCC_HCLKConfig(RCC_SYSCLK_Div1);//divisor unitario que é o divisor mais baixo possivel
 	RCC_PCLK1Config(RCC_HCLK_Div2); //PCLK1 no valor maximo possivel, ou seja, colocar o divisor minimo possivel
 	RCC_PCLK2Config(RCC_HCLK_Div1); //PCLK2 no valor maximo possivel, ou seja, colocar o divisor minimo possivel
 
@@ -131,21 +163,12 @@ void CAN_init(void)
 	CAN_Init(CAN1, &CAN_InitStructure);
 }
 
-void read_adc(void)
-{
-	//read_values_from_ADC_pins
-	ADC_SoftwareStartConvCmd ( ADC1 , ENABLE );
-	while(!DMA_GetFlagStatus(DMA1_FLAG_TC1));
-	DMA_ClearFlag(DMA1_FLAG_TC1);
-	DMA_ClearFlag(DMA1_FLAG_TC1);
-}
-
-void display(void)
+void display(int info)
 {
 
 	for(int i=0; i<8;i++)
 	{
-		sprintf(buff,"%d e %d \r\n",i,ADC1_Addr[i]);
+		sprintf(buff,"%d e %d \r\n\n",i, info);
 		for(int a=0; buff[a]!='\0';a++)
 		{
 			while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
@@ -153,6 +176,18 @@ void display(void)
 			USART_ClearFlag(USART2,USART_FLAG_TXE);
 		}
 	}
+}
+
+void show(int info) {
+
+	sprintf(buff,"%d \r\n\n",info);
+	for(int a=0; buff[a]!='\0';a++)
+	{
+		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART2, buff[a]);
+		USART_ClearFlag(USART2,USART_FLAG_TXE);
+	}
+
 }
 
 void can_send()
@@ -182,18 +217,208 @@ void can_recieve()
 	CAN_Receive(CAN1, 0 ,&RxMessage);
 }
 
+
+//int data_request( int ring, int cluster) {
+
+//	CanTxMsg Message;
+
+//	Message.StdId = ring;
+//	Message.Data[0] = cluster;
+
+//	if (CAN_Transmit(CAN1, &Message) == 0) {
+
+//		char can_retransmition = 1;
+
+//		while ( can_retransmition <= MAX_CAN_TRANSMIT_ATTEMPTS ) /* Tries to retransmit message a maximum of MAX_CAN_TRANSMIT_ATTEMPTS times */
+//			{
+//				if (CAN_Transmit(CAN1, &Message) == 1) { return 1; } /* If seccessfull return 1 */
+
+//				else { can_retransmition ++; }
+//			}
+
+//		if (can_retransmition > MAX_CAN_TRANSMIT_ATTEMPTS ) /* If error pressists, return 0 */
+//		{
+//			return 0;
+//		}
+
+//	} /* End of Can Retransmit */
+
+//	else {
+		// state = (next state);
+//		return 1;
+//	}	/* End of Can Transmit */
+
+//} /* End of data_request */
+
+/*
+void state_machine() {
+
+	switch (state)
+	{
+
+		case STATE_FIRST_RUN:
+			state = STATE_REQUEST_SENSOR_DATA;
+			break;
+
+
+		case STATE_REQUEST_SENSOR_DATA:
+
+			break;
+
+		default:
+			/* default statements */
+
+//	} /* End of switch */
+
+//} /* End of state_machine funtion */
+
+int dys = 3;
+void prose(void)
+{
+
+	switch(group)
+	{
+
+		case 1:
+			//Grupo 1
+			show(group);
+			TxMessage.StdId = RING1_ID;						  //identifier
+			CAN_Transmit(CAN1, &TxMessage);				  //transmit
+
+			tic = clock();
+
+			while(CAN_MessagePending(CAN1,CAN_FIFO0)==0) {   //wait for msg
+				toc = clock();
+				if( (double)(toc - tic) >= 50000) { //espera 50 ms
+					group = 2;
+					break;
+				}
+			}
+
+			CAN_Receive(CAN1, 0 ,&RxMessage);			  //msg
+
+			for (int i=0 ; i<8 ; i++) {
+				ring1.sensor_lux[i] = RxMessage.Data[i];
+			}
+			//display(ring1.sensor_lux);
+			break;
+
+
+		case 2:
+			//Grupo2
+			show(group);
+			TxMessage.StdId = RING2_ID;						  //identifier
+			CAN_Transmit(CAN1, &TxMessage);				  //transmit
+
+			tic = clock();
+			while(CAN_MessagePending(CAN1,CAN_FIFO0)==0) {   //wait for msg
+				toc = clock();
+				if( (double)(toc - tic) >= 50000) { //espera 50 ms
+					group = 1;
+					break;
+				}
+			}
+
+			CAN_Receive(CAN1, 0 ,&RxMessage);			  //msg
+
+			for (int i=0 ; i<8 ; i++) {
+				ring2.sensor_lux[i] = RxMessage.Data[i];
+			}
+			//display(ring2.sensor_lux);
+			break;
+/*
+		case 3:
+			//Grupo3
+			show(group);
+			TxMessage.StdId = RING3_ID;						  //identifier
+			CAN_Transmit(CAN1, &TxMessage);				  //transmit
+
+			tic = clock();
+			while(CAN_MessagePending(CAN1,CAN_FIFO0)==0) {   //wait for msg
+				toc = clock();
+				if(toc - tic >= 50000) { //espera 50 ms
+					group = 4;
+					break;
+				}
+			}
+
+			CAN_Receive(CAN1, 0 ,&RxMessage);			  //msg
+
+			for (int i=0 ; i<8 ; i++) {
+				ring3.sensor_lux[i] = RxMessage.Data[i];
+			}
+			//display(ring3.sensor_lux);
+			break;
+
+		case 4:
+			//Grupo4
+			show(group);
+			TxMessage.StdId = RING4_ID;						  //identifier
+			CAN_Transmit(CAN1, &TxMessage);				  //transmit
+
+			tic = clock();
+			while(CAN_MessagePending(CAN1,CAN_FIFO0)==0) {   //wait for msg
+				toc = clock();
+				if(toc - tic >= 50000) { //espera 50 ms
+					group = 5;
+					break;
+				}
+			}
+
+			CAN_Receive(CAN1, 0 ,&RxMessage);			  //msg
+
+			for (int i=0 ; i<8 ; i++) {
+				ring4.sensor_lux[i] = RxMessage.Data[i];
+			}
+			//display(ring4.sensor_lux);
+			break;
+
+		case 5:
+			//Grupo5
+			show(group);
+			TxMessage.StdId = RING5_ID;						  //identifier
+			CAN_Transmit(CAN1, &TxMessage);				  //transmit
+
+			tic = clock();
+			while(CAN_MessagePending(CAN1,CAN_FIFO0)==0) {   //wait for msg
+				toc = clock();
+				if((toc - tic)) >= 50000) { //espera 50 ms
+					group = 1;
+					break;
+				}
+			}
+
+			CAN_Receive(CAN1, 0 ,&RxMessage);			  //msg
+
+			for (int i=0 ; i<8 ; i++) {
+				ring5.sensor_lux[i] = RxMessage.Data[i];
+			}
+			//display(ring5.sensor_lux);
+			break;*/
+
+	}
+
+}
+
+
+
+
+
 int main(void)
 {
 	RCC_Config_HSI_PLL_64MHz();
 	Init();
 	lcd_init();
 	rcc_lcd_info();
-	while(1)
-	{
-		//read_adc();
-		//can_recieve();
-		//can_send();
-		//can_send();
-		display();
-	}
-}
+
+	while(1) {
+
+		///state_machine();
+		//prose();
+		//display();
+
+	} /* While loop end */
+
+
+	return 0;
+} /* Main end */
