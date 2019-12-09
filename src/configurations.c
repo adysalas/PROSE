@@ -7,6 +7,7 @@
 
 
 #include "configurations.h"
+#include "communication.h"
 
 
 void Init(void)

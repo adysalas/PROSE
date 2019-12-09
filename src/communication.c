@@ -6,148 +6,110 @@ CanTxMsg TxMessage;
 CanRxMsg RxMessage;
 
 rings ring1, ring2, ring3, ring4, ring5;
-
+uint64_t tic = 0;
+uint64_t toc = 0;
 char group;
 
 void state_MachineMain(void)
 {
-	static states actualRing = RING_1;
+	static states actualRing = RING_1_0;
 	static uint8_t enteringState = TRUE;
-
+	static maxAttempts numMaxAttempts = 0;
+	static uint8_t nothingReceived = FALSE;
 
 	switch(actualRing)
 	{
 
-		case RING_1:
+		case RING_1_0:
 		{
 			if (TRUE == enteringState)
 			{
-				group = 1;
-				enteringState = FALSE;
+				enteringState     = FALSE;
 			}
+			{
+				TxMessage.StdId   = RING1_ID;
+				TxMessage.Data[0] = (uint8_t)0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
 
-			//Grupo 1
-			show(group);
-			TxMessage.StdId = RING1_ID;	//identifier
-			TxMessage.Data[0] = (uint8_t)0x01;
-			TxMessage.Data[1] = (uint8_t)0x02;
-			TxMessage.RTR     = CAN_RTR_DATA;
-			TxMessage.DLC     = 8;
-			CAN_Transmit(CAN1, &TxMessage);				  //transmit
+				CAN_Transmit(CAN1, &TxMessage);//transmit
 
-			//tic = clock();
+				//tic = clock();
 
-			while(CAN_MessagePending(CAN1,CAN_FIFO0)!= FALSE) {   //wait for msg
-				//toc = clock();
-				//if( (double)(toc - tic) >= 50000) { //espera 50 ms
-					group = 1;
-					break;
+				/**
+				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
+				 */
+
+				while(CAN_MessagePending(CAN1,CAN_FIFO0)!= FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
+				{   //wait for msg
+					toc++;
+					if( (double)(toc - tic) >= 50000)
+					{
+						numMaxAttempts ++;
+						nothingReceived = TRUE;
+						break;
+					}
 				}
-
-			CAN_Receive(CAN1, 0 ,&RxMessage);			  //msg
-
-			for (int i=0 ; i<8 ; i++) {
-				ring1.sensor_lux[i] = RxMessage.Data[i];
-				//ring1.sensor_lux[i] = i;
+				if (FALSE == nothingReceived)
+				{
+					CAN_Receive(CAN1, 0 ,&RxMessage);
+					actualRing = RING_1_1;
+					for (int i=0 ; i<8 ; i++)
+					{
+						ring1.sensor_lux[i] = RxMessage.Data[i];
+					}
+				}
+				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
+				{
+					actualRing = RING_1_1;
+				}
 			}
-			display(ring1.sensor_lux);
 		}
 		break;
-		/*case 4:
+		case RING_1_1:
+		{
+			if (TRUE == enteringState)
+			{
+				enteringState     = FALSE;
+
+			}
+			TxMessage.StdId   = RING1_ID;
+			TxMessage.Data[0] = (uint8_t)0x01;
+			TxMessage.RTR     = CAN_RTR_DATA;
+			TxMessage.DLC     = 8;
+			CAN_Transmit(CAN1, &TxMessage);//transmit
+			tic = clock();
+			while(CAN_MessagePending(CAN1,CAN_FIFO0)!= FALSE || numMaxAttempts < MAX_CAN_TRANSMIT_ATTEMPTS)
+			{   //wait for msg
+				toc = clock();
+				if( (double)(toc - tic) >= 50000)
+				{ //espera 50 ms
+					numMaxAttempts ++;
+					nothingReceived = TRUE;
+					break;
+				}
+			}
+			if (FALSE == nothingReceived)
+			{
+				CAN_Receive(CAN1, 0 ,&RxMessage);
+				actualRing = RING_2_0;
+				for (int i=0 ; i<8 ; i++)
+				{
+					ring1.sensor_lux[i] = RxMessage.Data[i];
+				}
+			}
+		}
+		break;
+		case RING_2_0:
 		{
 
-			//Grupo2
-			//show(group);
-			TxMessage.StdId = RING2_ID;						  //identifier
-			CAN_Transmit(CAN1, &TxMessage);				  //transmit
-
-			//tic = clock();
-			while(CAN_MessagePending(CAN1,CAN_FIFO0) != 0) {   //wait for msg
-				//toc = clock();
-				//if( (double)(toc - tic) >= 50000) { //espera 50 ms
-					group = 4;
-					break;
-
-			}
-
-			CAN_Receive(CAN1, 0 ,&RxMessage);			  //msg
-
-			for (int i=0 ; i<8 ; i++) {
-				ring2.sensor_lux[i] = RxMessage.Data[i];
-			}
-
-			display(ring2.sensor_lux);
 		}
-/*
-		case 3:
-			//Grupo3
-			show(group);
-			TxMessage.StdId = RING3_ID;						  //identifier
-			CAN_Transmit(CAN1, &TxMessage);				  //transmit
+		break;
+		case RING_2_1:
+		{
 
-			tic = clock();
-			while(CAN_MessagePending(CAN1,CAN_FIFO0)==0) {   //wait for msg
-				toc = clock();
-				if(toc - tic >= 50000) { //espera 50 ms
-					group = 4;
-					break;
-				}
-			}
-
-			CAN_Receive(CAN1, 0 ,&RxMessage);			  //msg
-
-			for (int i=0 ; i<8 ; i++) {
-				ring3.sensor_lux[i] = RxMessage.Data[i];
-			}
-			//display(ring3.sensor_lux);
-			break;
-
-		case 4:
-			//Grupo4
-			show(group);
-			TxMessage.StdId = RING4_ID;						  //identifier
-			CAN_Transmit(CAN1, &TxMessage);				  //transmit
-
-			tic = clock();
-			while(CAN_MessagePending(CAN1,CAN_FIFO0)==0) {   //wait for msg
-				toc = clock();
-				if(toc - tic >= 50000) { //espera 50 ms
-					group = 5;
-					break;
-				}
-			}
-
-			CAN_Receive(CAN1, 0 ,&RxMessage);			  //msg
-
-			for (int i=0 ; i<8 ; i++) {
-				ring4.sensor_lux[i] = RxMessage.Data[i];
-			}
-			//display(ring4.sensor_lux);
-			break;
-
-		case 5:
-			//Grupo5
-			show(group);
-			TxMessage.StdId = RING5_ID;						  //identifier
-			CAN_Transmit(CAN1, &TxMessage);				  //transmit
-
-			tic = clock();
-			while(CAN_MessagePending(CAN1,CAN_FIFO0)==0) {   //wait for msg
-				toc = clock();
-				if((toc - tic)) >= 50000) { //espera 50 ms
-					group = 1;
-					break;
-				}
-			}
-
-			CAN_Receive(CAN1, 0 ,&RxMessage);			  //msg
-
-			for (int i=0 ; i<8 ; i++) {
-				ring5.sensor_lux[i] = RxMessage.Data[i];
-			}
-			//display(ring5.sensor_lux);
-			break;*/
-
+		}
+		break;
 	}
 }
 

@@ -13,9 +13,7 @@ int a = 1;
 float roll;		/* Body roll */
 float pitch;	/* Body pitch */
 
-static int state = 0;	/* State of state machine */
 
-clock_t tic, toc;
 
 /* State machine states defines */
 #define STATE_FIRST_RUN 0
@@ -25,7 +23,6 @@ clock_t tic, toc;
 
 
 /* Other defines */
-#define MAX_CAN_TRANSMIT_ATTEMPTS 3;
 
 
 

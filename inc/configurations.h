@@ -17,6 +17,7 @@ void configurationInterruptTim3(void);
 void RCC_Config_HSI_PLL_64MHz(void);
 void Init(void);
 void show(int info);
+void state_MachineMain(void);
 
 
 
