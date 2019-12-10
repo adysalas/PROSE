@@ -40,13 +40,14 @@ void state_MachineMain(void)
 				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
 				 */
 
-				while(CAN_MessagePending(CAN1,CAN_FIFO0)!= FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
+				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
 				{   //wait for msg
 					toc++;
 					if( (double)(toc - tic) >= 50000)
 					{
 						numMaxAttempts ++;
 						nothingReceived = TRUE;
+						actualRing = RING_1_0;
 						break;
 					}
 				}
@@ -62,6 +63,8 @@ void state_MachineMain(void)
 				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
 				{
 					actualRing = RING_1_1;
+					numMaxAttempts = 0;
+					nothingReceived = FALSE;
 				}
 			}
 		}
@@ -71,45 +74,444 @@ void state_MachineMain(void)
 			if (TRUE == enteringState)
 			{
 				enteringState     = FALSE;
-
 			}
-			TxMessage.StdId   = RING1_ID;
-			TxMessage.Data[0] = (uint8_t)0x01;
-			TxMessage.RTR     = CAN_RTR_DATA;
-			TxMessage.DLC     = 8;
-			CAN_Transmit(CAN1, &TxMessage);//transmit
-			tic = clock();
-			while(CAN_MessagePending(CAN1,CAN_FIFO0)!= FALSE || numMaxAttempts < MAX_CAN_TRANSMIT_ATTEMPTS)
-			{   //wait for msg
-				toc = clock();
-				if( (double)(toc - tic) >= 50000)
-				{ //espera 50 ms
-					numMaxAttempts ++;
-					nothingReceived = TRUE;
-					break;
-				}
-			}
-			if (FALSE == nothingReceived)
 			{
-				CAN_Receive(CAN1, 0 ,&RxMessage);
-				actualRing = RING_2_0;
-				for (int i=0 ; i<8 ; i++)
+				TxMessage.StdId   = RING1_ID;
+				TxMessage.Data[0] = (uint8_t)0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+
+				//tic = clock();
+
+				/**
+				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
+				 */
+
+				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
+				{   //wait for msg
+					toc++;
+					if( (double)(toc - tic) >= 50000)
+					{
+						numMaxAttempts ++;
+						nothingReceived = TRUE;
+						actualRing = RING_1_1;
+						break;
+					}
+				}
+				if (FALSE == nothingReceived)
 				{
-					ring1.sensor_lux[i] = RxMessage.Data[i];
+					CAN_Receive(CAN1, 0 ,&RxMessage);
+					actualRing = RING_2_0;
+					for (int i=0 ; i<8 ; i++)
+					{
+						ring1.sensor_lux[i] = RxMessage.Data[i];
+					}
+				}
+				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
+				{
+					actualRing = RING_2_0;
+					numMaxAttempts = 0;
+					nothingReceived = FALSE;
 				}
 			}
 		}
 		break;
 		case RING_2_0:
 		{
+			if (TRUE == enteringState)
+			{
+				enteringState     = FALSE;
+			}
+			{
+				TxMessage.StdId   = RING1_ID;
+				TxMessage.Data[0] = (uint8_t)0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
 
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+
+				//tic = clock();
+
+				/**
+				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
+				 */
+
+				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
+				{   //wait for msg
+					toc++;
+					if( (double)(toc - tic) >= 50000)
+					{
+						numMaxAttempts ++;
+						nothingReceived = TRUE;
+						actualRing = RING_2_0;
+						break;
+					}
+				}
+				if (FALSE == nothingReceived)
+				{
+					CAN_Receive(CAN1, 0 ,&RxMessage);
+					actualRing = RING_2_1;
+					for (int i=0 ; i<8 ; i++)
+					{
+						ring1.sensor_lux[i] = RxMessage.Data[i];
+					}
+				}
+				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
+				{
+					actualRing = RING_2_1;
+					numMaxAttempts = 0;
+					nothingReceived = FALSE;
+				}
+			}
 		}
 		break;
 		case RING_2_1:
 		{
+			if (TRUE == enteringState)
+			{
+				enteringState     = FALSE;
+			}
+			{
+				TxMessage.StdId   = RING1_ID;
+				TxMessage.Data[0] = (uint8_t)0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
 
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+
+				//tic = clock();
+
+				/**
+				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
+				 */
+
+				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
+				{   //wait for msg
+					toc++;
+					if( (double)(toc - tic) >= 50000)
+					{
+						numMaxAttempts ++;
+						nothingReceived = TRUE;
+						actualRing = RING_2_1;
+						break;
+					}
+				}
+				if (FALSE == nothingReceived)
+				{
+					CAN_Receive(CAN1, 0 ,&RxMessage);
+					actualRing = RING_3_0;
+					for (int i=0 ; i<8 ; i++)
+					{
+						ring1.sensor_lux[i] = RxMessage.Data[i];
+					}
+				}
+				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
+				{
+					actualRing = RING_3_0;
+					numMaxAttempts = 0;
+					nothingReceived = FALSE;
+				}
+			}
 		}
 		break;
+		case RING_3_0:
+		{
+			if (TRUE == enteringState)
+			{
+				enteringState     = FALSE;
+			}
+			{
+				TxMessage.StdId   = RING1_ID;
+				TxMessage.Data[0] = (uint8_t)0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+
+				//tic = clock();
+
+				/**
+				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
+				 */
+
+				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
+				{   //wait for msg
+					toc++;
+					if( (double)(toc - tic) >= 50000)
+					{
+						numMaxAttempts ++;
+						nothingReceived = TRUE;
+						actualRing = RING_3_0;
+						break;
+					}
+				}
+				if (FALSE == nothingReceived)
+				{
+					CAN_Receive(CAN1, 0 ,&RxMessage);
+					actualRing = RING_3_1;
+					for (int i=0 ; i<8 ; i++)
+					{
+						ring1.sensor_lux[i] = RxMessage.Data[i];
+					}
+				}
+				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
+				{
+					actualRing = RING_3_1;
+					numMaxAttempts = 0;
+					nothingReceived = FALSE;
+				}
+			}
+		}
+		break;
+		case RING_3_1:
+		{
+			if (TRUE == enteringState)
+			{
+				enteringState     = FALSE;
+			}
+			{
+				TxMessage.StdId   = RING1_ID;
+				TxMessage.Data[0] = (uint8_t)0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+
+				//tic = clock();
+
+				/**
+				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
+				 */
+
+				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
+				{   //wait for msg
+					toc++;
+					if( (double)(toc - tic) >= 50000)
+					{
+						numMaxAttempts ++;
+						nothingReceived = TRUE;
+						actualRing = RING_3_1;
+						break;
+					}
+				}
+				if (FALSE == nothingReceived)
+				{
+					CAN_Receive(CAN1, 0 ,&RxMessage);
+					actualRing = RING_4_0;
+					for (int i=0 ; i<8 ; i++)
+					{
+						ring1.sensor_lux[i] = RxMessage.Data[i];
+					}
+				}
+				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
+				{
+					actualRing = RING_4_0;
+					numMaxAttempts = 0;
+					nothingReceived = FALSE;
+				}
+			}
+		}
+		break;
+		case RING_4_0:
+		{
+			if (TRUE == enteringState)
+			{
+				enteringState     = FALSE;
+			}
+			{
+				TxMessage.StdId   = RING1_ID;
+				TxMessage.Data[0] = (uint8_t)0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+
+				//tic = clock();
+
+				/**
+				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
+				 */
+
+				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
+				{   //wait for msg
+					toc++;
+					if( (double)(toc - tic) >= 50000)
+					{
+						numMaxAttempts ++;
+						nothingReceived = TRUE;
+						actualRing = RING_4_0;
+						break;
+					}
+				}
+				if (FALSE == nothingReceived)
+				{
+					CAN_Receive(CAN1, 0 ,&RxMessage);
+					actualRing = RING_4_1;
+					for (int i=0 ; i<8 ; i++)
+					{
+						ring1.sensor_lux[i] = RxMessage.Data[i];
+					}
+				}
+				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
+				{
+					actualRing = RING_4_1;
+					numMaxAttempts = 0;
+					nothingReceived = FALSE;
+				}
+			}
+		}
+		break;
+		case RING_4_1:
+		{
+			if (TRUE == enteringState)
+			{
+				enteringState     = FALSE;
+			}
+			{
+				TxMessage.StdId   = RING1_ID;
+				TxMessage.Data[0] = (uint8_t)0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+
+				//tic = clock();
+
+				/**
+				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
+				 */
+
+				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
+				{   //wait for msg
+					toc++;
+					if( (double)(toc - tic) >= 50000)
+					{
+						numMaxAttempts ++;
+						nothingReceived = TRUE;
+						actualRing = RING_4_1;
+						break;
+					}
+				}
+				if (FALSE == nothingReceived)
+				{
+					CAN_Receive(CAN1, 0 ,&RxMessage);
+					actualRing = RING_5_0;
+					for (int i=0 ; i<8 ; i++)
+					{
+						ring1.sensor_lux[i] = RxMessage.Data[i];
+					}
+				}
+				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
+				{
+					actualRing = RING_5_0;
+					numMaxAttempts = 0;
+					nothingReceived = FALSE;
+				}
+			}
+		}
+		break;
+		case RING_5_0:
+			{
+				if (TRUE == enteringState)
+				{
+					enteringState     = FALSE;
+				}
+				{
+					TxMessage.StdId   = RING1_ID;
+					TxMessage.Data[0] = (uint8_t)0x00;
+					TxMessage.RTR     = CAN_RTR_DATA;
+					TxMessage.DLC     = 8;
+
+					CAN_Transmit(CAN1, &TxMessage);//transmit
+
+					//tic = clock();
+
+					/**
+					 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
+					 */
+
+					while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
+					{   //wait for msg
+						toc++;
+						if( (double)(toc - tic) >= 50000)
+						{
+							numMaxAttempts ++;
+							nothingReceived = TRUE;
+							actualRing = RING_5_0;
+							break;
+						}
+					}
+					if (FALSE == nothingReceived)
+					{
+						CAN_Receive(CAN1, 0 ,&RxMessage);
+						actualRing = RING_5_1;
+						for (int i=0 ; i<8 ; i++)
+						{
+							ring1.sensor_lux[i] = RxMessage.Data[i];
+						}
+					}
+					else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
+					{
+						actualRing = RING_5_1;
+						numMaxAttempts = 0;
+						nothingReceived = FALSE;
+					}
+				}
+			}
+			break;
+			case RING_5_1:
+			{
+				if (TRUE == enteringState)
+				{
+					enteringState     = FALSE;
+				}
+				{
+					TxMessage.StdId   = RING1_ID;
+					TxMessage.Data[0] = (uint8_t)0x00;
+					TxMessage.RTR     = CAN_RTR_DATA;
+					TxMessage.DLC     = 8;
+
+					CAN_Transmit(CAN1, &TxMessage);//transmit
+
+					//tic = clock();
+
+					/**
+					 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
+					 */
+
+					while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
+					{   //wait for msg
+						toc++;
+						if( (double)(toc - tic) >= 50000)
+						{
+							numMaxAttempts ++;
+							nothingReceived = TRUE;
+							actualRing = RING_5_1;
+							break;
+						}
+					}
+					if (FALSE == nothingReceived)
+					{
+						CAN_Receive(CAN1, 0 ,&RxMessage);
+						actualRing = RING_1_0;
+						for (int i=0 ; i<8 ; i++)
+						{
+							ring1.sensor_lux[i] = RxMessage.Data[i];
+						}
+					}
+					else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
+					{
+						actualRing = RING_1_0;
+						numMaxAttempts = 0;
+						nothingReceived = FALSE;
+					}
+				}
+			}
+			break;
+			default:
+				break;
 	}
 }
 

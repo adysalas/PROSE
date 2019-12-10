@@ -46,6 +46,26 @@ typedef enum{
 		RING_5_1
 }states ;
 
+typedef struct _sensor{
+	unsigned char byte0;
+	unsigned char byte1;
+}sensor;
+
+
+typedef union _data_sensors{
+	sensor sensor1;
+	sensor sensor2;
+	sensor sensor3;
+	sensor sensor4;
+	sensor sensor5;
+	sensor sensor6;
+	sensor sensor7;
+	sensor sensor8;
+
+	sensor sensors[8];
+}data_sensors;
+
+
 /**
  * Declaration of Extern Variables.
  */
