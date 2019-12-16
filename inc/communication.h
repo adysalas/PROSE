@@ -18,9 +18,12 @@
 #define RING4_ID 					(0x04)
 #define RING5_ID 					(0x05)
 #define MAX_CAN_TRANSMIT_ATTEMPTS 	(3u)
+#define HOLD_TIME					(250000ul)
 
 #define TRUE (1u)
 #define FALSE (0u)
+
+#define NULL_SENSOR (0u)
 
 typedef struct ring{
 	float sensor_lux[8];
@@ -43,13 +46,11 @@ typedef enum{
 		RING_4_0,
 		RING_4_1,
 		RING_5_0,
-		RING_5_1
+		RING_5_1,
+		ROLL_CALC
 }states ;
 
-typedef struct _sensor{
-	unsigned char byte0;
-	unsigned char byte1;
-}sensor;
+typedef float sensor;
 
 
 typedef union _data_sensors{
@@ -76,6 +77,9 @@ extern CanRxMsg RxMessage;
 void CAN_Configuration(void);
 void can_send(void);
 void can_recieve(void);
+void displayString(int value);
+void displayString2(int value);
+void displei(void);
 
 
 #endif /* COMMUNICATION_H_ */

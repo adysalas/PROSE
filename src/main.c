@@ -24,7 +24,20 @@ float pitch;	/* Body pitch */
 
 /* Other defines */
 
+void displei(void)
+{
 
+	for(int i=0; i<8;i++)
+	{
+		sprintf(buff,"Sensor %d --> %d \r\n",i, RxMessage.Data[i]);
+		for(int a=0; buff[a]!='\0';a++)
+		{
+			while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+			USART_SendData(USART2, buff[a]);
+			USART_ClearFlag(USART2,USART_FLAG_TXE);
+		}
+	}
+}
 
 void display(float *info)
 {
@@ -41,6 +54,28 @@ void display(float *info)
 			USART_ClearFlag(USART2,USART_FLAG_TXE);
 		}
 		info++;
+	}
+}
+
+void displayString(int value)
+{
+	sprintf(buff,"Sensor %i pedido \r\n\n", value);
+	for(int a=0; buff[a]!='\0';a++)
+	{
+		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART2, buff[a]);
+		USART_ClearFlag(USART2,USART_FLAG_TXE);
+	}
+}
+
+void displayString2(int value)
+{
+	sprintf(buff,"Sensor %i_1 pedido \r\n\n", value);
+	for(int a=0; buff[a]!='\0';a++)
+	{
+		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART2, buff[a]);
+		USART_ClearFlag(USART2,USART_FLAG_TXE);
 	}
 }
 
@@ -68,6 +103,8 @@ int main(void)
 	while(1) {
 
 		///state_machine();
+
+		//displei();
 		state_MachineMain();
 		//display();
 
