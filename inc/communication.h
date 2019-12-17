@@ -76,5 +76,7 @@ void CAN_CleanRxBuffer(void);
 void displayNADA(void);
 void stateMachineReloaded(void);
 void displayError(void);
+float compute_pitch(rings *sensor);
+float compute_roll(rings *sensor);
 
 #endif /* COMMUNICATION_H_ */

@@ -8,6 +8,7 @@ CanRxMsg RxMessage;
 rings finalData[5];
 //data_sensors ring1,ring2,ring3,ring4,ring5;
 rings ring1,ring2,ring3,ring4,ring5;
+rings _rings[5];
 uint64_t tic = 0;
 uint64_t toc = 0;
 char group;
@@ -200,10 +201,10 @@ void stateMachineReloaded(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				ring1.sensor_lux[0] =  NULL_SENSOR;
-				ring1.sensor_lux[1] =  NULL_SENSOR;
-				ring1.sensor_lux[2] =  NULL_SENSOR;
-				ring1.sensor_lux[3] =  NULL_SENSOR;
+				_rings[0].sensor_lux[0] =  NULL_SENSOR;
+				_rings[0].sensor_lux[1] =  NULL_SENSOR;
+				_rings[0].sensor_lux[2] =  NULL_SENSOR;
+				_rings[0].sensor_lux[3] =  NULL_SENSOR;
 
 			}
 			else
@@ -211,10 +212,10 @@ void stateMachineReloaded(void)
 				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
 				displei();
 
-				ring1.sensor_lux[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-				ring1.sensor_lux[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-				ring1.sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-				ring1.sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+				_rings[0].sensor_lux[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				_rings[0].sensor_lux[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				_rings[0].sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				_rings[0].sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 
 				state = RING_1_1;
 
@@ -252,10 +253,10 @@ void stateMachineReloaded(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				ring1.sensor_lux[4] =  NULL_SENSOR;
-				ring1.sensor_lux[5] =  NULL_SENSOR;
-				ring1.sensor_lux[6] =  NULL_SENSOR;
-				ring1.sensor_lux[7] =  NULL_SENSOR;
+				_rings[0].sensor_lux[4] =  NULL_SENSOR;
+				_rings[0].sensor_lux[5] =  NULL_SENSOR;
+				_rings[0].sensor_lux[6] =  NULL_SENSOR;
+				_rings[0].sensor_lux[7] =  NULL_SENSOR;
 			}
 			else
 			{
@@ -267,10 +268,10 @@ void stateMachineReloaded(void)
 				delay();
 				enteringState = TRUE;
 
-				ring1.sensor_lux[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-				ring1.sensor_lux[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-				ring1.sensor_lux[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-				ring1.sensor_lux[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+				_rings[0].sensor_lux[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				_rings[0].sensor_lux[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				_rings[0].sensor_lux[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				_rings[0].sensor_lux[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 			}
 
 		}
@@ -300,10 +301,10 @@ void stateMachineReloaded(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				ring2.sensor_lux[0] =  NULL_SENSOR;
-				ring2.sensor_lux[1] =  NULL_SENSOR;
-				ring2.sensor_lux[2] =  NULL_SENSOR;
-				ring2.sensor_lux[3] =  NULL_SENSOR;
+				_rings[1].sensor_lux[0] =  NULL_SENSOR;
+				_rings[1].sensor_lux[1] =  NULL_SENSOR;
+				_rings[1].sensor_lux[2] =  NULL_SENSOR;
+				_rings[1].sensor_lux[3] =  NULL_SENSOR;
 			}
 			else
 			{
@@ -315,10 +316,10 @@ void stateMachineReloaded(void)
 				delay();
 				enteringState = TRUE;
 
-				ring2.sensor_lux[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-				ring2.sensor_lux[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-				ring2.sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-				ring2.sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+				_rings[1].sensor_lux[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				_rings[1].sensor_lux[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				_rings[1].sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				_rings[1].sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 			}
 
 
@@ -351,10 +352,10 @@ void stateMachineReloaded(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				ring2.sensor_lux[4] =  NULL_SENSOR;
-				ring2.sensor_lux[5] =  NULL_SENSOR;
-				ring2.sensor_lux[6] =  NULL_SENSOR;
-				ring2.sensor_lux[7] =  NULL_SENSOR;
+				_rings[1].sensor_lux[4] =  NULL_SENSOR;
+				_rings[1].sensor_lux[5] =  NULL_SENSOR;
+				_rings[1].sensor_lux[6] =  NULL_SENSOR;
+				_rings[1].sensor_lux[7] =  NULL_SENSOR;
 			}
 			else
 			{
@@ -366,10 +367,10 @@ void stateMachineReloaded(void)
 				delay();
 				enteringState = TRUE;
 
-				ring2.sensor_lux[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-				ring2.sensor_lux[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-				ring2.sensor_lux[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-				ring2.sensor_lux[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+				_rings[1].sensor_lux[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				_rings[1].sensor_lux[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				_rings[1].sensor_lux[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				_rings[1].sensor_lux[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 			}
 
 		}
@@ -399,10 +400,10 @@ void stateMachineReloaded(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				ring3.sensor_lux[0] =  NULL_SENSOR;
-				ring3.sensor_lux[1] =  NULL_SENSOR;
-				ring3.sensor_lux[2] =  NULL_SENSOR;
-				ring3.sensor_lux[3] =  NULL_SENSOR;
+				_rings[2].sensor_lux[0] =  NULL_SENSOR;
+				_rings[2].sensor_lux[1] =  NULL_SENSOR;
+				_rings[2].sensor_lux[2] =  NULL_SENSOR;
+				_rings[2].sensor_lux[3] =  NULL_SENSOR;
 			}
 			else
 			{
@@ -414,10 +415,10 @@ void stateMachineReloaded(void)
 				delay();
 				enteringState = TRUE;
 
-				ring3.sensor_lux[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-				ring3.sensor_lux[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-				ring3.sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-				ring3.sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+				_rings[2].sensor_lux[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				_rings[2].sensor_lux[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				_rings[2].sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				_rings[2].sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 			}
 
 
@@ -450,10 +451,10 @@ void stateMachineReloaded(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				ring3.sensor_lux[4] =  NULL_SENSOR;
-				ring3.sensor_lux[5] =  NULL_SENSOR;
-				ring3.sensor_lux[6] =  NULL_SENSOR;
-				ring3.sensor_lux[7] =  NULL_SENSOR;
+				_rings[2].sensor_lux[4] =  NULL_SENSOR;
+				_rings[2].sensor_lux[5] =  NULL_SENSOR;
+				_rings[2].sensor_lux[6] =  NULL_SENSOR;
+				_rings[2].sensor_lux[7] =  NULL_SENSOR;
 			}
 			else
 			{
@@ -465,10 +466,10 @@ void stateMachineReloaded(void)
 				delay();
 				enteringState = TRUE;
 
-				ring3.sensor_lux[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-				ring3.sensor_lux[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-				ring3.sensor_lux[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-				ring3.sensor_lux[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+				_rings[2].sensor_lux[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				_rings[2].sensor_lux[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				_rings[2].sensor_lux[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				_rings[2].sensor_lux[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 			}
 
 		}
@@ -498,10 +499,10 @@ void stateMachineReloaded(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				ring4.sensor_lux[0] =  NULL_SENSOR;
-				ring4.sensor_lux[1] =  NULL_SENSOR;
-				ring4.sensor_lux[2] =  NULL_SENSOR;
-				ring4.sensor_lux[3] =  NULL_SENSOR;
+				_rings[3].sensor_lux[0] =  NULL_SENSOR;
+				_rings[3].sensor_lux[1] =  NULL_SENSOR;
+				_rings[3].sensor_lux[2] =  NULL_SENSOR;
+				_rings[3].sensor_lux[3] =  NULL_SENSOR;
 			}
 			else
 			{
@@ -513,10 +514,10 @@ void stateMachineReloaded(void)
 				delay();
 				enteringState = TRUE;
 
-				ring4.sensor_lux[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-				ring4.sensor_lux[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-				ring4.sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-				ring4.sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+				_rings[3].sensor_lux[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				_rings[3].sensor_lux[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				_rings[3].sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				_rings[3].sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 			}
 
 
@@ -549,10 +550,10 @@ void stateMachineReloaded(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				ring4.sensor_lux[4] =  NULL_SENSOR;
-				ring4.sensor_lux[5] =  NULL_SENSOR;
-				ring4.sensor_lux[6] =  NULL_SENSOR;
-				ring4.sensor_lux[7] =  NULL_SENSOR;
+				_rings[3].sensor_lux[4] =  NULL_SENSOR;
+				_rings[3].sensor_lux[5] =  NULL_SENSOR;
+				_rings[3].sensor_lux[6] =  NULL_SENSOR;
+				_rings[3].sensor_lux[7] =  NULL_SENSOR;
 			}
 			else
 			{
@@ -564,10 +565,10 @@ void stateMachineReloaded(void)
 				delay();
 				enteringState = TRUE;
 
-				ring4.sensor_lux[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-				ring4.sensor_lux[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-				ring4.sensor_lux[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-				ring4.sensor_lux[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+				_rings[3].sensor_lux[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				_rings[3].sensor_lux[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				_rings[3].sensor_lux[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				_rings[3].sensor_lux[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 			}
 
 		}
@@ -597,10 +598,10 @@ void stateMachineReloaded(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				ring5.sensor_lux[0] =  NULL_SENSOR;
-				ring5.sensor_lux[1] =  NULL_SENSOR;
-				ring5.sensor_lux[2] =  NULL_SENSOR;
-				ring5.sensor_lux[3] =  NULL_SENSOR;
+				_rings[4].sensor_lux[0] =  NULL_SENSOR;
+				_rings[4].sensor_lux[1] =  NULL_SENSOR;
+				_rings[4].sensor_lux[2] =  NULL_SENSOR;
+				_rings[4].sensor_lux[3] =  NULL_SENSOR;
 			}
 			else
 			{
@@ -612,10 +613,10 @@ void stateMachineReloaded(void)
 				delay();
 				enteringState = TRUE;
 
-				ring5.sensor_lux[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-				ring5.sensor_lux[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-				ring5.sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-				ring5.sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+				_rings[4].sensor_lux[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				_rings[4].sensor_lux[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				_rings[4].sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				_rings[4].sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 			}
 
 
@@ -648,10 +649,10 @@ void stateMachineReloaded(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				ring5.sensor_lux[4] =  NULL_SENSOR;
-				ring5.sensor_lux[5] =  NULL_SENSOR;
-				ring5.sensor_lux[6] =  NULL_SENSOR;
-				ring5.sensor_lux[7] =  NULL_SENSOR;
+				_rings[4].sensor_lux[4] =  NULL_SENSOR;
+				_rings[4].sensor_lux[5] =  NULL_SENSOR;
+				_rings[4].sensor_lux[6] =  NULL_SENSOR;
+				_rings[4].sensor_lux[7] =  NULL_SENSOR;
 			}
 			else
 			{
@@ -663,16 +664,22 @@ void stateMachineReloaded(void)
 				delay();
 				enteringState = TRUE;
 
-				ring5.sensor_lux[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-				ring5.sensor_lux[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-				ring5.sensor_lux[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-				ring5.sensor_lux[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+				_rings[4].sensor_lux[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				_rings[4].sensor_lux[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				_rings[4].sensor_lux[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				_rings[4].sensor_lux[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 			}
 
 		}
 		break;
 		case ROLL_CALC:
 		{
+
+			for (int i=0;i<5;i++)
+			{
+				_rings[i].roll = compute_roll(&_rings[i]);
+				_rings[i].pitch = compute_pitch(&_rings[i]);
+			}
 			state = RING_1_0;
 		}
 		default:
@@ -734,4 +741,11 @@ float compute_roll(rings *sensor) {
 	}
 
 	return roll;
+}
+
+float compute_pitch(rings *sensor)
+{
+	float pitch;
+	
+	return pitch;
 }
