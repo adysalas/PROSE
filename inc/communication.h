@@ -70,15 +70,13 @@ extern char buff[30];
 void CAN_Configuration(void);
 void can_send(void);
 void can_recieve(void);
-void displayString(int value,int cluster);
-void displayString2(int value);
-void displei(void);
+
 void CAN_CleanRxBuffer(void);
-void displayNADA(void);
+
 void stateMachineReloaded(void);
-void displayError(void);
+
 float compute_pitch(rings *sensor);
 float compute_roll(rings *sensor);
-void sendString(char* string);
+
 
 #endif /* COMMUNICATION_H_ */
