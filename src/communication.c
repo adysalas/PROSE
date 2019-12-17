@@ -11,6 +11,8 @@ uint64_t tic = 0;
 uint64_t toc = 0;
 char group;
 
+static void delay(void);
+
 void state_MachineMain(void)
 {
 	static states actualRing = RING_1_0;
@@ -18,6 +20,12 @@ void state_MachineMain(void)
 	static maxAttempts numMaxAttempts = 0;
 	static uint8_t nothingReceived = FALSE;
 	static uint8_t send = TRUE;
+
+
+	//CAN_Receive(CAN1,0,&RxMessage);
+
+
+
 
 	switch(actualRing)
 	{
@@ -27,8 +35,9 @@ void state_MachineMain(void)
 			if (TRUE == enteringState)
 			{
 				toc = 0;
-				displayString(1);
+				displayString(1,TRUE);
 				enteringState     = FALSE;
+				CAN_CleanRxBuffer();
 			}
 			{
 				if (TRUE == send )
@@ -38,652 +47,129 @@ void state_MachineMain(void)
 					TxMessage.Data[0] = (uint8_t)0x00;
 					TxMessage.RTR     = CAN_RTR_DATA;
 					TxMessage.DLC     = 8;
-
+					send = TRUE;
 					CAN_Transmit(CAN1, &TxMessage);//transmit
 				}
 
 
-				//tic = clock();
+				while ( CAN_MessagePending(CAN1,CAN_FIFO0) != 0)
+				{
+					CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				}
 
-				/**
-				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
-				 */
-				CAN_Receive(CAN1,0,&RxMessage);
 				if (RxMessage.StdId == RING1_ID)
 				{
 					//CAN_Receive(CAN1, 0 ,&RxMessage);
 					actualRing = RING_1_1;
 					numMaxAttempts = 0;
-					ring1.sensor1 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-					ring1.sensor2 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-					ring1.sensor3 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-					ring1.sensor4 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+//					ring1.sensor1 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+//					ring1.sensor2 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+//					ring1.sensor3 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+//					ring1.sensor4 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+
 					displei();
+					CAN_CleanRxBuffer();
+
+
 
 				}
 				else
 				{
 					toc++;
-										//displei();
+					send = TRUE;
+					//displei();
 					if( (unsigned long)(toc - tic) >= HOLD_TIME)
 					{
 						//displei();
-						numMaxAttempts ++;
-						nothingReceived = TRUE;
-						actualRing = RING_1_0;
-						send = TRUE;
-						break;
-					}
-				}
-
-				if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
-				{
-					actualRing = RING_2_0;
-					numMaxAttempts = 0;
-					nothingReceived = FALSE;
-					ring1.sensor1 =  NULL_SENSOR;
-					ring1.sensor2 =  NULL_SENSOR;
-					ring1.sensor3 =  NULL_SENSOR;
-					ring1.sensor4 =  NULL_SENSOR;
-					enteringState = TRUE;
-				}
-			}
-		}
-		break;
-		case RING_1_1:
-		{
-			if (TRUE == enteringState)
-			{
-				toc = 0;
-				displayString2(1);
-				enteringState     = FALSE;
-			}
-			{
-				if (TRUE == send )
-				{
-					TxMessage.StdId   = RING1_ID;
-					TxMessage.Data[0] = (uint8_t)0x01;
-					TxMessage.RTR     = CAN_RTR_DATA;
-					TxMessage.DLC     = 8;
-
-					CAN_Transmit(CAN1, &TxMessage);//transmit
-					send = FALSE;
-				}
-
-				//tic = clock();
-
-				/**
-				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
-				 */
-
-				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
-				{   //wait for msg
-					toc++;
-					if( (unsigned long)(toc - tic) >= HOLD_TIME)
-					{
-						numMaxAttempts ++;
-						nothingReceived = TRUE;
-						actualRing = RING_1_1;
-						send = TRUE;
-						break;
-					}
-				}
-				if (FALSE == nothingReceived)
-				{
-					CAN_Receive(CAN1, 0 ,&RxMessage);
-					numMaxAttempts = 0;
-					actualRing = RING_2_0;
-					ring1.sensor5 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-					ring1.sensor6 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-					ring1.sensor7 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-					ring1.sensor8 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
-					displei();
-					enteringState = TRUE;
-				}
-				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
-				{
-					actualRing = RING_2_0;
-
-					numMaxAttempts = 0;
-					nothingReceived = FALSE;
-					enteringState = TRUE;
-					ring1.sensor5 =  NULL_SENSOR;
-					ring1.sensor6 =  NULL_SENSOR;
-					ring1.sensor7 =  NULL_SENSOR;
-					ring1.sensor8 =  NULL_SENSOR;
-				}
-			}
-		}
-		break;
-		case RING_2_0:
-		{
-			if (TRUE == enteringState)
-			{
-				toc = 0;
-				displayString(2);
-				enteringState     = FALSE;
-			}
-			{
-				if (TRUE == send)
-				{
-					TxMessage.StdId   = RING2_ID;
-					TxMessage.Data[0] = (uint8_t)0x00;
-					TxMessage.RTR     = CAN_RTR_DATA;
-					TxMessage.DLC     = 8;
-					send = FALSE;
-
-					CAN_Transmit(CAN1, &TxMessage);//transmit
-				}
-
-
-				//tic = clock();
-
-				/**
-				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
-				 */
-
-				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
-				{   //wait for msg
-					toc++;
-					if( (double)(toc - tic) >= HOLD_TIME)
-					{
-						numMaxAttempts ++;
+						//numMaxAttempts ++;
 						nothingReceived = TRUE;
 						actualRing = RING_2_0;
-						send = TRUE;
+						displayNADA();
 						break;
 					}
+
+
+
 				}
-				if (FALSE == nothingReceived)
+
+				if (TRUE == nothingReceived )
 				{
-					CAN_Receive(CAN1, 0 ,&RxMessage);
-					actualRing = RING_2_1;
-					numMaxAttempts = 0;
-					ring2.sensor1 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-					ring2.sensor2 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-					ring2.sensor3 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-					ring2.sensor4 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
-					displei();
-				}
-				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
-				{
-					actualRing = RING_3_0;
-					numMaxAttempts = 0;
+//					ring1.sensor1 =  NULL_SENSOR;
+//					ring1.sensor2 =  NULL_SENSOR;
+//					ring1.sensor3 =  NULL_SENSOR;
+//					ring1.sensor4 =  NULL_SENSOR;
 					nothingReceived = FALSE;
-					enteringState = TRUE;
-					ring2.sensor1 =  NULL_SENSOR;
-					ring2.sensor2 =  NULL_SENSOR;
-					ring2.sensor3 =  NULL_SENSOR;
-					ring2.sensor4 =  NULL_SENSOR;
 				}
 			}
 		}
 		break;
-		case RING_2_1:
-		{
-			if (TRUE == enteringState)
-			{
-				toc = 0;
-				displayString2(2);
-				enteringState     = FALSE;
-			}
-			{
-				if (TRUE == send)
+
+		case RING_1_1:
 				{
-					TxMessage.StdId   = RING2_ID;
-					TxMessage.Data[0] = (uint8_t)0x01;
-					TxMessage.RTR     = CAN_RTR_DATA;
-					TxMessage.DLC     = 8;
-
-					CAN_Transmit(CAN1, &TxMessage);//transmit
-
-					send = FALSE;
-				}
-
-				//tic = clock();
-
-				/**
-				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
-				 */
-
-				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
-				{   //wait for msg
-					toc++;
-					if( (double)(toc - tic) >= HOLD_TIME)
+					if (TRUE == enteringState)
 					{
-						numMaxAttempts ++;
-						nothingReceived = TRUE;
-						actualRing = RING_2_1;
-						send = TRUE;
-						break;
+						toc = 0;
+						displayString(1,TRUE);
+						enteringState     = FALSE;
+						CAN_CleanRxBuffer();
 					}
-				}
-				if (FALSE == nothingReceived)
-				{
-					CAN_Receive(CAN1, 0 ,&RxMessage);
-					actualRing = RING_3_0;
-					numMaxAttempts = 0;
-					enteringState = TRUE;
-					ring2.sensor5 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-					ring2.sensor6 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-					ring2.sensor7 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-					ring2.sensor8 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
-					displei();
-				}
-				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
-				{
-					actualRing = RING_3_0;
-					numMaxAttempts = 0;
-					nothingReceived = FALSE;
-					enteringState = TRUE;
-					ring2.sensor5 =  NULL_SENSOR;
-					ring2.sensor6 =  NULL_SENSOR;
-					ring2.sensor7 =  NULL_SENSOR;
-					ring2.sensor8 =  NULL_SENSOR;
-				}
-			}
-		}
-		break;
-		case RING_3_0:
-		{
-			if (TRUE == enteringState)
-			{
-				toc = 0;
-				displayString(3);
-				enteringState     = FALSE;
-			}
-			{
-				if (TRUE == send)
-				{
-					TxMessage.StdId   = RING3_ID;
-					TxMessage.Data[0] = (uint8_t)0x00;
-					TxMessage.RTR     = CAN_RTR_DATA;
-					TxMessage.DLC     = 8;
-
-					CAN_Transmit(CAN1, &TxMessage);//transmit
-
-					send = FALSE;
-				}
-
-				//tic = clock();
-
-				/**
-				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
-				 */
-
-				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
-				{   //wait for msg
-					toc++;
-					if( (double)(toc - tic) >= HOLD_TIME)
 					{
-						numMaxAttempts ++;
-						nothingReceived = TRUE;
-						actualRing = RING_3_0;
-						send = TRUE;
-						break;
-					}
-				}
-				if (FALSE == nothingReceived)
-				{
-					CAN_Receive(CAN1, 0 ,&RxMessage);
-					actualRing = RING_3_1;
-					numMaxAttempts = 0;
-					ring3.sensor1 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-					ring3.sensor2 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-					ring3.sensor3 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-					ring3.sensor4 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
-					displei();
-					enteringState = TRUE;
-				}
-				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
-				{
-					actualRing = RING_4_0;
-					numMaxAttempts = 0;
-					nothingReceived = FALSE;
-					ring3.sensor1 =  NULL_SENSOR;
-					ring3.sensor2 =  NULL_SENSOR;
-					ring3.sensor3 =  NULL_SENSOR;
-					ring3.sensor4 =  NULL_SENSOR;
-					enteringState = TRUE;
-				}
-			}
-		}
-		break;
-		case RING_3_1:
-		{
-			if (TRUE == enteringState)
-			{
-				toc = 0;
-				enteringState     = FALSE;
-				displayString2(3);
-			}
-			{
-				if (TRUE == send)
-				{
-					TxMessage.StdId   = RING3_ID;
-					TxMessage.Data[0] = (uint8_t)0x01;
-					TxMessage.RTR     = CAN_RTR_DATA;
-					TxMessage.DLC     = 8;
-
-					CAN_Transmit(CAN1, &TxMessage);//transmit
-
-					send = FALSE;
-				}
-
-				//tic = clock();
-
-				/**
-				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
-				 */
-
-				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
-				{   //wait for msg
-					toc++;
-					if( (double)(toc - tic) >= HOLD_TIME)
-					{
-						numMaxAttempts ++;
-						nothingReceived = TRUE;
-						actualRing = RING_3_1;
-						send = TRUE;
-						break;
-					}
-				}
-				if (FALSE == nothingReceived)
-				{
-					CAN_Receive(CAN1, 0 ,&RxMessage);
-					actualRing = RING_4_0;
-					numMaxAttempts = 0;
-					ring3.sensor5 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-					ring3.sensor6 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-					ring3.sensor7 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-					ring3.sensor8 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
-					displei();
-					enteringState = TRUE;
-				}
-				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
-				{
-					actualRing = RING_4_0;
-					numMaxAttempts = 0;
-					nothingReceived = FALSE;
-					ring3.sensor5 =  NULL_SENSOR;
-					ring3.sensor6 =  NULL_SENSOR;
-					ring3.sensor7 =  NULL_SENSOR;
-					ring3.sensor8 =  NULL_SENSOR;
-					enteringState = TRUE;
-				}
-			}
-		}
-		break;
-		case RING_4_0:
-		{
-			if (TRUE == enteringState)
-			{
-				toc = 0;
-				displayString(4);
-				enteringState     = FALSE;
-			}
-			{
-				if (TRUE == send)
-				{
-					TxMessage.StdId   = RING4_ID;
-					TxMessage.Data[0] = (uint8_t)0x00;
-					TxMessage.RTR     = CAN_RTR_DATA;
-					TxMessage.DLC     = 8;
-
-					CAN_Transmit(CAN1, &TxMessage);//transmit
-
-					send = FALSE;
-				}
-
-				//tic = clock();
-
-				/**
-				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
-				 */
-
-				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
-				{   //wait for msg
-					toc++;
-					if( (double)(toc - tic) >= HOLD_TIME)
-					{
-						numMaxAttempts ++;
-						nothingReceived = TRUE;
-						actualRing = RING_4_0;
-						send = TRUE;
-
-						break;
-					}
-				}
-				if (FALSE == nothingReceived)
-				{
-					CAN_Receive(CAN1, 0 ,&RxMessage);
-					actualRing = RING_4_1;
-					numMaxAttempts = 0;
-					ring4.sensor1 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-					ring4.sensor2 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-					ring4.sensor3 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-					ring4.sensor4 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
-					displei();
-					enteringState = TRUE;
-				}
-				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
-				{
-					actualRing = RING_5_0;
-					numMaxAttempts = 0;
-					nothingReceived = FALSE;
-					ring4.sensor1 =  NULL_SENSOR;
-					ring4.sensor2 =  NULL_SENSOR;
-					ring4.sensor3 =  NULL_SENSOR;
-					ring4.sensor4 =  NULL_SENSOR;
-					enteringState = TRUE;
-				}
-			}
-		}
-		break;
-		case RING_4_1:
-		{
-			if (TRUE == enteringState)
-			{
-				toc = 0;
-				enteringState     = FALSE;
-				displayString2(4);
-			}
-			{
-
-				if (TRUE == send)
-				{
-					TxMessage.StdId   = RING4_ID;
-
-					TxMessage.Data[0] = (uint8_t)0x01;
-					TxMessage.RTR     = CAN_RTR_DATA;
-					TxMessage.DLC     = 8;
-
-					CAN_Transmit(CAN1, &TxMessage);//transmit
-
-					send = FALSE;
-				}
-				//tic = clock();
-
-				/**
-				 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
-				 */
-
-				while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
-				{   //wait for msg
-					toc++;
-					if( (double)(toc - tic) >= HOLD_TIME)
-					{
-						numMaxAttempts ++;
-						nothingReceived = TRUE;
-						actualRing = RING_4_1;
-						send = TRUE;
-						break;
-					}
-				}
-				if (FALSE == nothingReceived)
-				{
-					CAN_Receive(CAN1, 0 ,&RxMessage);
-					actualRing = RING_5_0;
-					numMaxAttempts = 0;
-					ring4.sensor5 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-					ring4.sensor6 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-					ring4.sensor7 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-					ring4.sensor8 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
-					enteringState = TRUE;
-				}
-				else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
-				{
-					actualRing = RING_5_0;
-					numMaxAttempts = 0;
-					nothingReceived = FALSE;
-					ring4.sensor5 =  NULL_SENSOR;
-					ring4.sensor6 =  NULL_SENSOR;
-					ring4.sensor7 =  NULL_SENSOR;
-					ring4.sensor8 =  NULL_SENSOR;
-					enteringState = TRUE;
-				}
-			}
-		}
-		break;
-		case RING_5_0:
-			{
-				if (TRUE == enteringState)
-				{
-					toc = 0;
-					displayString(5);
-					enteringState     = FALSE;
-				}
-				{
-					if (TRUE == send)
-					{
-						TxMessage.StdId   = RING5_ID;
-						TxMessage.Data[0] = (uint8_t)0x00;
-						TxMessage.RTR     = CAN_RTR_DATA;
-						TxMessage.DLC     = 8;
-
-						CAN_Transmit(CAN1, &TxMessage);//transmit
-
-						send = FALSE;
-					}
-
-					//tic = clock();
-
-					/**
-					 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
-					 */
-
-					while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
-					{   //wait for msg
-						toc++;
-						if( (double)(toc - tic) >= HOLD_TIME)
+						if (TRUE == send )
 						{
-							numMaxAttempts ++;
-							nothingReceived = TRUE;
-							actualRing = RING_5_0;
+							send = FALSE;
+							TxMessage.StdId   = RING1_ID;
+							TxMessage.Data[0] = (uint8_t)0x01;
+							TxMessage.RTR     = CAN_RTR_DATA;
+							TxMessage.DLC     = 8;
 							send = TRUE;
-							break;
+							CAN_Transmit(CAN1, &TxMessage);//transmit
 						}
-					}
-					if (FALSE == nothingReceived)
-					{
-						CAN_Receive(CAN1, 0 ,&RxMessage);
-						actualRing = RING_5_1;
-						numMaxAttempts = 0;
-						ring5.sensor1 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-						ring5.sensor2 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-						ring5.sensor3 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-						ring5.sensor4 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
-						enteringState = TRUE;
-					}
-					else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
-					{
-						actualRing = ROLL_CALC;
-						numMaxAttempts = 0;
-						nothingReceived = FALSE;
-						ring5.sensor1 =  NULL_SENSOR;
-						ring5.sensor2 =  NULL_SENSOR;
-						ring5.sensor3 =  NULL_SENSOR;
-						ring5.sensor4 =  NULL_SENSOR;
-						enteringState = TRUE;
-					}
-				}
-			}
-			break;
-			case RING_5_1:
-			{
-				if (TRUE == enteringState)
-				{
-					toc = 0;
-					enteringState  = FALSE;
-					displayString2(5);
-				}
-				{
-					if (TRUE == send)
-					{
-						TxMessage.StdId   = RING5_ID;
-						TxMessage.Data[0] = (uint8_t)0x01;
-						TxMessage.RTR     = CAN_RTR_DATA;
-						TxMessage.DLC     = 8;
 
-						CAN_Transmit(CAN1, &TxMessage);//transmit
-
-						send = FALSE;
-					}
-
-					//tic = clock();
-
-					/**
-					 *	TODO: WITH TOC IS NOT WORKING GOOD. CREATE TIMER AT 1MS to put this part good.
-					 */
-
-					while(CAN_MessagePending(CAN1,CAN_FIFO0) != FALSE || numMaxAttempts <= MAX_CAN_TRANSMIT_ATTEMPTS)
-					{   //wait for msg
-						toc++;
-						if( (double)(toc - tic) >= HOLD_TIME)
+						CAN_Receive(CAN1,0,&RxMessage);
+						if (RxMessage.StdId == RING1_ID)
 						{
-							numMaxAttempts ++;
-							nothingReceived = TRUE;
-							actualRing = RING_5_1;
-							break;
+							//CAN_Receive(CAN1, 0 ,&RxMessage);
+							actualRing = RING_2_0;
+							numMaxAttempts = 0;
+//							ring1.sensor5 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+//							ring1.sensor6 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+//							ring1.sensor7 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+//							ring1.sensor8 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+							displei();
+							CAN_CleanRxBuffer();
+
+						}
+						else
+						{
+							toc++;
+							send = TRUE;
+							//displei();
+							if( (unsigned long)(toc - tic) >= HOLD_TIME)
+							{
+								//displei();
+								//numMaxAttempts ++;
+								nothingReceived = TRUE;
+								actualRing = RING_2_0;
+								displayNADA();
+								break;
+
+							}
+						}
+
+						if (TRUE == nothingReceived )
+						{
+//							ring1.sensor5 =  NULL_SENSOR;
+//							ring1.sensor6 =  NULL_SENSOR;
+//							ring1.sensor7 =  NULL_SENSOR;
+//							ring1.sensor8 =  NULL_SENSOR;
+							nothingReceived = FALSE;
 						}
 					}
-					if (FALSE == nothingReceived)
-					{
-						CAN_Receive(CAN1, 0 ,&RxMessage);
-						//actualRing = ROLL_CALC;
-						actualRing = RING_1_0;
-						numMaxAttempts = 0;
-						ring5.sensor5 =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-						ring5.sensor6 =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-						ring5.sensor7 =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
-						ring5.sensor8 =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
-						enteringState = TRUE;
-					}
-					else if (TRUE == nothingReceived && numMaxAttempts == MAX_CAN_TRANSMIT_ATTEMPTS)
-					{
-						//actualRing = ROLL_CALC;
-						actualRing = RING_1_0;
-						numMaxAttempts = 0;
-						nothingReceived = FALSE;
-						ring5.sensor5 =  NULL_SENSOR;
-						ring5.sensor6 =  NULL_SENSOR;
-						ring5.sensor7 =  NULL_SENSOR;
-						ring5.sensor8 =  NULL_SENSOR;
-						enteringState = TRUE;
-					}
-
 				}
-			}
-			break;
-			case (ROLL_CALC):
-			{
-				toc = 0;
-				actualRing = RING_1_0;
-			}
-			break;
-			default:
 				break;
+
 	}
+//#endif
 }
 
 void CAN_Configuration(void)
@@ -765,4 +251,589 @@ void can_recieve()
 {
 	CanRxMsg RxMessage;
 	CAN_Receive(CAN1, 0 ,&RxMessage);
+}
+
+void CAN_CleanRxBuffer(void)
+{
+	RxMessage.StdId = 0xFF;
+
+	 RxMessage.Data[0] = 0;
+	 RxMessage.Data[1] = 0;
+	 RxMessage.Data[2] = 0;
+	 RxMessage.Data[3] = 0;
+	 RxMessage.Data[4] = 0;
+	 RxMessage.Data[5] = 0;
+	 RxMessage.Data[6] = 0;
+	 RxMessage.Data[7] = 0;
+}
+
+
+
+void stateMachineReloaded(void)
+{
+	static states state = 0;
+	static int enteringState = TRUE;
+
+	switch (state)
+	{
+
+		case RING_1_0:
+		{
+			if (TRUE == enteringState )
+			{
+				displayString(1,TRUE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING1_ID;
+				TxMessage.Data[0] = 0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				strcpy(TxMessage.Data,"        ");
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				state = RING_2_0;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				ring1[0] =  NULL_SENSOR;
+				ring1[1] =  NULL_SENSOR;
+				ring1[2] =  NULL_SENSOR;
+				ring1[3] =  NULL_SENSOR;
+
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				displei();
+
+				ring1[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				ring1[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				ring1[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				ring1[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+
+				state = RING_1_1;
+
+				delay();
+				enteringState = TRUE;
+			}
+
+
+		}
+		break;
+		case RING_1_1:
+		{
+			if (TRUE == enteringState )
+			{
+				i50ms_Counter = 0;
+				displayString(1,FALSE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING1_ID;
+				TxMessage.Data[0] = (uint8_t)0x01;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				strcpy(TxMessage.Data,"        ");
+
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				state = RING_2_0;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				ring1[4] =  NULL_SENSOR;
+				ring1[5] =  NULL_SENSOR;
+				ring1[6] =  NULL_SENSOR;
+				ring1[7] =  NULL_SENSOR;
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				displei();
+
+				state = RING_2_0;
+
+				delay();
+				enteringState = TRUE;
+
+				ring1[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				ring1[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				ring1[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				ring1[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+			}
+
+		}
+		break;
+		case RING_2_0:
+		{
+			if (TRUE == enteringState )
+			{
+				displayString(2,TRUE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING2_ID;
+				TxMessage.Data[0] = 0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				strcpy(TxMessage.Data,"        ");
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				state = RING_3_0;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				ring2[0] =  NULL_SENSOR;
+				ring2[1] =  NULL_SENSOR;
+				ring2[2] =  NULL_SENSOR;
+				ring2[3] =  NULL_SENSOR;
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				displei();
+
+				state = RING_2_1;
+
+				delay();
+				enteringState = TRUE;
+
+				ring2[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				ring2[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				ring2[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				ring2[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+			}
+
+
+		}
+		break;
+		case RING_2_1:
+		{
+			if (TRUE == enteringState )
+			{
+				i50ms_Counter = 0;
+				displayString(2,FALSE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING2_ID;
+				TxMessage.Data[0] = (uint8_t)0x01;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				strcpy(TxMessage.Data,"        ");
+
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				state = RING_3_0;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				ring2[4] =  NULL_SENSOR;
+				ring2[5] =  NULL_SENSOR;
+				ring2[6] =  NULL_SENSOR;
+				ring2[7] =  NULL_SENSOR;
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				displei();
+
+				state = RING_3_0;
+
+				delay();
+				enteringState = TRUE;
+
+				ring2[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				ring2[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				ring2[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				ring2[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+			}
+
+		}
+		break;
+		case RING_3_0:
+		{
+			if (TRUE == enteringState )
+			{
+				displayString(3,TRUE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING3_ID;
+				TxMessage.Data[0] = 0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				strcpy(TxMessage.Data,"        ");
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				state = RING_4_0;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				ring3[0] =  NULL_SENSOR;
+				ring3[1] =  NULL_SENSOR;
+				ring3[2] =  NULL_SENSOR;
+				ring3[3] =  NULL_SENSOR;
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				displei();
+
+				state = RING_3_1;
+
+				delay();
+				enteringState = TRUE;
+
+				ring3[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				ring3[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				ring3[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				ring3[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+			}
+
+
+		}
+		break;
+		case RING_3_1:
+		{
+			if (TRUE == enteringState )
+			{
+				i50ms_Counter = 0;
+				displayString(3,FALSE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING3_ID;
+				TxMessage.Data[0] = (uint8_t)0x01;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				strcpy(TxMessage.Data,"        ");
+
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				state = RING_4_0;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				ring3[4] =  NULL_SENSOR;
+				ring3[5] =  NULL_SENSOR;
+				ring3[6] =  NULL_SENSOR;
+				ring3[7] =  NULL_SENSOR;
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				displei();
+
+				state = RING_4_0;
+
+				delay();
+				enteringState = TRUE;
+
+				ring3[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				ring3[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				ring3[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				ring3[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+			}
+
+		}
+		break;
+		case RING_4_0:
+		{
+			if (TRUE == enteringState )
+			{
+				displayString(4,TRUE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING4_ID;
+				TxMessage.Data[0] = 0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				strcpy(TxMessage.Data,"        ");
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				state = RING_5_0;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				ring4[0] =  NULL_SENSOR;
+				ring4[1] =  NULL_SENSOR;
+				ring4[2] =  NULL_SENSOR;
+				ring4[3] =  NULL_SENSOR;
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				displei();
+
+				state = RING_4_1;
+
+				delay();
+				enteringState = TRUE;
+
+				ring4[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				ring4[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				ring4[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				ring4[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+			}
+
+
+		}
+		break;
+		case RING_4_1:
+		{
+			if (TRUE == enteringState )
+			{
+				i50ms_Counter = 0;
+				displayString(4,FALSE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING4_ID;
+				TxMessage.Data[0] = (uint8_t)0x01;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				strcpy(TxMessage.Data,"        ");
+
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				state = RING_5_0;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				ring4[4] =  NULL_SENSOR;
+				ring4[5] =  NULL_SENSOR;
+				ring4[6] =  NULL_SENSOR;
+				ring4[7] =  NULL_SENSOR;
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				displei();
+
+				state = RING_5_0;
+
+				delay();
+				enteringState = TRUE;
+
+				ring4[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				ring4[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				ring4[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				ring4[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+			}
+
+		}
+		break;
+		case RING_5_0:
+		{
+			if (TRUE == enteringState )
+			{
+				displayString(5,TRUE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING5_ID;
+				TxMessage.Data[0] = 0x00;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				strcpy(TxMessage.Data,"        ");
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				state = ROLL_CALC;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				ring5[0] =  NULL_SENSOR;
+				ring5[1] =  NULL_SENSOR;
+				ring5[2] =  NULL_SENSOR;
+				ring5[3] =  NULL_SENSOR;
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				displei();
+
+				state = RING_5_1;
+
+				delay();
+				enteringState = TRUE;
+
+				ring5[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				ring5[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				ring5[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				ring5[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+			}
+
+
+		}
+		break;
+		case RING_5_1:
+		{
+			if (TRUE == enteringState )
+			{
+				i50ms_Counter = 0;
+				displayString(5,FALSE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING5_ID;
+				TxMessage.Data[0] = (uint8_t)0x01;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 8;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				strcpy(TxMessage.Data,"        ");
+
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				state = ROLL_CALC;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				ring4[4] =  NULL_SENSOR;
+				ring4[5] =  NULL_SENSOR;
+				ring4[6] =  NULL_SENSOR;
+				ring4[7] =  NULL_SENSOR;
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				displei();
+
+				state = ROLL_CALC;
+
+				delay();
+				enteringState = TRUE;
+
+				ring5[4] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+				ring5[5] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+				ring5[6] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
+				ring5[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
+			}
+
+		}
+		break;
+		case ROLL_CALC:
+		{
+			state = RING_1_0;
+		}
+		default:
+
+			break;
+	}
+}
+
+
+static void delay(void)
+{
+	for (int i=0;i<1500000;i++);
+}
+
+
+float compute_roll(rings *sensor) {
+
+	double roll;
+	//Ver quais são os dois mais intensos
+
+	double int_primeiro = 0;
+	double int_segundo = 0;
+	int angulo_primeiro, angulo_segundo, primeiro_sensor, segundo_sensor;
+
+	for(int i=0; i<=7; i++) {
+
+		if(sensor->sensor_lux[i] >= int_segundo) {
+			int_segundo = sensor->sensor_lux[i]; angulo_segundo = (i*45); segundo_sensor = i;
+		}
+
+		if(sensor->sensor_lux[i] >= int_primeiro) {
+			int_primeiro = sensor->sensor_lux[i]; angulo_primeiro = (i*45); primeiro_sensor = i;
+		}
+
+	}
+
+	//calcular a percentagem da diferença relativamente ao mais intenso
+
+	float DiferencaEntreSensores;
+	DiferencaEntreSensores = int_segundo/int_primeiro;
+
+	//casos particulares do circulo trigonométrico
+	if(primeiro_sensor == 0 && segundo_sensor == 7) {
+		angulo_primeiro += 360;
+		primeiro_sensor = 8;
+	}
+
+	else if(primeiro_sensor == 7 && segundo_sensor == 0) {
+		angulo_segundo += 360;
+	}
+
+
+	if(primeiro_sensor > segundo_sensor ) { //está para a direita
+		roll = angulo_primeiro - DiferencaEntreSensores * 45;
+	}
+
+	else if(segundo_sensor > primeiro_sensor) { //está para a esquerda
+		roll = angulo_primeiro + DiferencaEntreSensores * 45;
+	}
+
+	return roll;
 }

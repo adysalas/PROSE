@@ -14,11 +14,11 @@
 
 #define RING1_ID 					(0x01)
 #define RING2_ID 					(0x02)
-#define RING3_ID 					(0x02)
+#define RING3_ID 					(0x03)
 #define RING4_ID 					(0x04)
 #define RING5_ID 					(0x05)
 #define MAX_CAN_TRANSMIT_ATTEMPTS 	(3u)
-#define HOLD_TIME					(250000ul)
+#define HOLD_TIME					(125000ul)
 
 #define TRUE (1u)
 #define FALSE (0u)
@@ -53,18 +53,7 @@ typedef enum{
 typedef float sensor;
 
 
-typedef union _data_sensors{
-	sensor sensor1;
-	sensor sensor2;
-	sensor sensor3;
-	sensor sensor4;
-	sensor sensor5;
-	sensor sensor6;
-	sensor sensor7;
-	sensor sensor8;
-
-	sensor sensors[8];
-}data_sensors;
+typedef float data_sensors[8];
 
 
 /**
@@ -72,14 +61,19 @@ typedef union _data_sensors{
  */
 extern CanTxMsg TxMessage;
 extern CanRxMsg RxMessage;
+extern int i50ms_Counter;
+extern int b50ms_Counter;
 
 
 void CAN_Configuration(void);
 void can_send(void);
 void can_recieve(void);
-void displayString(int value);
+void displayString(int value,int cluster);
 void displayString2(int value);
 void displei(void);
-
+void CAN_CleanRxBuffer(void);
+void displayNADA(void);
+void stateMachineReloaded(void);
+void displayError(void);
 
 #endif /* COMMUNICATION_H_ */

@@ -7,7 +7,11 @@
 
 
 #include "stm32f10x_it.h"
+#include "communication.h"
 
+
+int i50ms_Counter;
+int b50ms_Counter;
 
 /*******************************************************************************
 * Function Name  : NMIException
@@ -454,9 +458,18 @@ void TIM2_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-//void TIM3_IRQHandler(void)
-//{
-//}
+void TIM3_IRQHandler(void)
+{
+	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+
+
+	i50ms_Counter++;
+
+	if (i50ms_Counter > 50)
+	{
+		b50ms_Counter = TRUE;
+	}
+}
 
 /*******************************************************************************
 * Function Name  : TIM4_IRQHandler
