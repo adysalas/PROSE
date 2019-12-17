@@ -10,8 +10,7 @@ char buff[30];
 uint16_t ADC1_Addr[8];
 int a = 1;
 
-float roll;		/* Body roll */
-float pitch;	/* Body pitch */
+
 
 
 
@@ -181,5 +180,17 @@ void displayError(void)
 		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
 		USART_SendData(USART2, buff[a]);
 		USART_ClearFlag(USART2,USART_FLAG_TXE);
+	}
+}
+
+void sendString(char* string)
+{
+	for(int a=0; *string!='\0';a++)
+	{
+		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART2, *string);
+		USART_ClearFlag(USART2,USART_FLAG_TXE);
+
+		string++;
 	}
 }

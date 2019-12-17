@@ -11,65 +11,14 @@ rings ring1,ring2,ring3,ring4,ring5;
 rings _rings[5];
 uint64_t tic = 0;
 uint64_t toc = 0;
+
+float rollGeral;
+float pitchGeral;
+
 char group;
 
 static void delay(void);
 
-void state_MachineMain(void)
-{
-	static states actualRing = RING_1_0;
-	static uint8_t enteringState = TRUE;
-	static maxAttempts numMaxAttempts = 0;
-	static uint8_t nothingReceived = FALSE;
-	static uint8_t send = TRUE;
-
-
-	//CAN_Receive(CAN1,0,&RxMessage);
-
-
-
-
-	switch(actualRing)
-	{
-
-		case RING_1_0:
-		{
-			if (TRUE == enteringState)
-			{
-				toc = 0;
-				displayString(1,TRUE);
-				enteringState     = FALSE;
-				CAN_CleanRxBuffer();
-			}
-			{
-				if (TRUE == send )
-				{
-					send = FALSE;
-					TxMessage.StdId   = RING1_ID;
-					TxMessage.Data[0] = (uint8_t)0x00;
-					TxMessage.RTR     = CAN_RTR_DATA;
-					TxMessage.DLC     = 8;
-					send = TRUE;
-					CAN_Transmit(CAN1, &TxMessage);//transmit
-				}
-
-
-				while ( CAN_MessagePending(CAN1,CAN_FIFO0) != 0)
-				{
-					CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
-				}
-
-				if (RxMessage.StdId == RING1_ID)
-				{
-					//CAN_Receive(CAN1, 0 ,&RxMessage);
-					actualRing = RING_1_1;
-					numMaxAttempts = 0;
-				}
-			}
-		}
-	}
-
-}
 
 void CAN_Configuration(void)
 {
@@ -674,14 +623,20 @@ void stateMachineReloaded(void)
 		break;
 		case ROLL_CALC:
 		{
+			rollGeral = 0;
 
 			for (int i=0;i<5;i++)
 			{
 				_rings[i].roll = compute_roll(&_rings[i]);
-				_rings[i].pitch = compute_pitch(&_rings[i]);
+				rollGeral += _rings[i].roll;
+				pitchGeral = compute_pitch(&_rings[i]);
 			}
+			rollGeral /= 5;
+
+
 			state = RING_1_0;
 		}
+		break;
 		default:
 
 			break;
@@ -698,46 +653,87 @@ static void delay(void)
 float compute_roll(rings *sensor) {
 
 	double roll;
-	//Ver quais são os dois mais intensos
+	//Ver quais sÃ£o os dois mais intensos
 
-	double int_primeiro = 0;
-	double int_segundo = 0;
-	int angulo_primeiro, angulo_segundo, primeiro_sensor, segundo_sensor;
+	float fFirstHigherLux = sensor->sensor_lux[0];
+	float fSecondHigherLux = 0;
+	int iFirstBrightSensor = 0, iSecondBrightSensor = 0;
 
-	for(int i=0; i<=7; i++) {
-
-		if(sensor->sensor_lux[i] >= int_segundo) {
-			int_segundo = sensor->sensor_lux[i]; angulo_segundo = (i*45); segundo_sensor = i;
-		}
-
-		if(sensor->sensor_lux[i] >= int_primeiro) {
-			int_primeiro = sensor->sensor_lux[i]; angulo_primeiro = (i*45); primeiro_sensor = i;
-		}
-
+	for(int i=0; i<=7; i++)
+	{
+	  if (sensor->sensor_lux[i] > fFirstHigherLux){
+	    fFirstHigherLux = sensor->sensor_lux[i];
+	    iFirstBrightSensor = i;
+	  }
 	}
 
-	//calcular a percentagem da diferença relativamente ao mais intenso
+	sprintf(buff,"HigherLux: %f  Sensor: %i.\n", fFirstHigherLux,iFirstBrightSensor);
+	sendString(&buff);
+	//calcular a percentagem da diferenÃ§a relativamente ao mais intenso
+
+	if(iFirstBrightSensor >= 1 &&  iFirstBrightSensor <= 6)
+	{
+	    /**
+    	 * Normal Case Highest Sensor is not 0.
+    	 */
+    	if (sensor->sensor_lux[iFirstBrightSensor + 1] > sensor->sensor_lux[iFirstBrightSensor - 1])
+    	{
+    	    iSecondBrightSensor =  iFirstBrightSensor + 1;
+    	    fSecondHigherLux    = sensor->sensor_lux[iFirstBrightSensor + 1];
+    	}
+    	else
+    	{
+    	    iSecondBrightSensor =  iFirstBrightSensor - 1;
+    	    fSecondHigherLux    = sensor->sensor_lux[iFirstBrightSensor - 1];
+    	}
+	}
+	else if ( iFirstBrightSensor == 0)
+	{
+	    /**
+	     *  Case when most bright sensor is the 0.
+	     */
+	    if (sensor->sensor_lux[iFirstBrightSensor + 1] > sensor->sensor_lux[7])
+    	{
+    	    iSecondBrightSensor =  iFirstBrightSensor + 1;
+    	    fSecondHigherLux    = sensor->sensor_lux[iFirstBrightSensor + 1];
+    	}
+    	else
+    	{
+    	    iSecondBrightSensor =  7;
+    	    fSecondHigherLux    = sensor->sensor_lux[7];
+    	}
+	}
+	else
+	{
+	    /**
+	     *  Case when most bright sensor is the 7.
+	     */
+	    if (sensor->sensor_lux[0] > sensor->sensor_lux[iFirstBrightSensor - 1])
+    	{
+    	    iSecondBrightSensor =  0;
+    	    fSecondHigherLux    = sensor->sensor_lux[0];
+    	}
+    	else
+    	{
+    	    iSecondBrightSensor = iFirstBrightSensor - 1;
+    	    fSecondHigherLux    = sensor->sensor_lux[iFirstBrightSensor - 1];
+    	}
+	}
+
+	sprintf(buff,"Second HigherLux: %f  Sensor: %i. \n", fSecondHigherLux,iSecondBrightSensor);
+	sendString(&buff);
 
 	float DiferencaEntreSensores;
-	DiferencaEntreSensores = int_segundo/int_primeiro;
+	DiferencaEntreSensores = (fSecondHigherLux/fFirstHigherLux)*45;
+	float fFirstHigherLuxAngle = iFirstBrightSensor * 45;
+	float fSecondHigherLuxAngle = iSecondBrightSensor * 45;
 
-	//casos particulares do circulo trigonométrico
-	if(primeiro_sensor == 0 && segundo_sensor == 7) {
-		angulo_primeiro += 360;
-		primeiro_sensor = 8;
+	if(fFirstHigherLuxAngle > fSecondHigherLuxAngle ) { //estÃ¡ para a direita
+		roll = fFirstHigherLuxAngle - DiferencaEntreSensores;
 	}
 
-	else if(primeiro_sensor == 7 && segundo_sensor == 0) {
-		angulo_segundo += 360;
-	}
-
-
-	if(primeiro_sensor > segundo_sensor ) { //está para a direita
-		roll = angulo_primeiro - DiferencaEntreSensores * 45;
-	}
-
-	else if(segundo_sensor > primeiro_sensor) { //está para a esquerda
-		roll = angulo_primeiro + DiferencaEntreSensores * 45;
+	else if(fSecondHigherLuxAngle > fFirstHigherLuxAngle) { //estÃ¡ para a esquerda
+		roll = fSecondHigherLuxAngle + DiferencaEntreSensores;
 	}
 
 	return roll;

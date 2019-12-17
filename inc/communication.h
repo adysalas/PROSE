@@ -64,6 +64,7 @@ extern CanTxMsg TxMessage;
 extern CanRxMsg RxMessage;
 extern int i50ms_Counter;
 extern int b50ms_Counter;
+extern char buff[30];
 
 
 void CAN_Configuration(void);
@@ -78,5 +79,6 @@ void stateMachineReloaded(void);
 void displayError(void);
 float compute_pitch(rings *sensor);
 float compute_roll(rings *sensor);
+void sendString(char* string);
 
 #endif /* COMMUNICATION_H_ */
