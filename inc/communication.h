@@ -28,6 +28,7 @@
 typedef struct ring{
 	float sensor_lux[8];
 	float roll;
+	float pitch;
 }rings;
 
 
