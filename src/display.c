@@ -22,6 +22,17 @@ void displayError(void)
 	}
 }
 
+void displayErrorID(int error)
+{
+	sprintf(buff,"Wrong ID Speaking on WRONG TIME: %x \r\n",error);
+	for(int a=0; buff[a]!='\0';a++)
+	{
+		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART2, buff[a]);
+		USART_ClearFlag(USART2,USART_FLAG_TXE);
+	}
+}
+
 void sendString(char* string)
 {
 	for(int a=0; *string!='\0';a++)

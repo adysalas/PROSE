@@ -29,6 +29,7 @@ typedef struct ring{
 	float sensor_lux[8];
 	float roll;
 	float pitch;
+	int   successfullTransmision;
 }rings;
 
 
@@ -76,7 +77,7 @@ void CAN_CleanRxBuffer(void);
 void stateMachineReloaded(void);
 
 float compute_pitch(rings *sensor);
-float compute_roll(rings *sensor);
+float compute_roll(rings *sensor,int *validsRoll);
 
 
 #endif /* COMMUNICATION_H_ */

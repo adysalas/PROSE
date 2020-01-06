@@ -18,7 +18,7 @@ void displayNADA(void);
 void displayString(int value,int cluster);
 void displayString2(int value);
 void displei(void);
-
+void displayErrorID(int error);
 
 
 #endif /* DISPLAY_H_ */
