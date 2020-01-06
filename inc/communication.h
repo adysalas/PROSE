@@ -64,7 +64,7 @@ extern CanTxMsg TxMessage;
 extern CanRxMsg RxMessage;
 extern int i50ms_Counter;
 extern int b50ms_Counter;
-extern char buff[30];
+extern char buff[100];
 
 
 void CAN_Configuration(void);

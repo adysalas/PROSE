@@ -8,7 +8,7 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
-extern char buff[30];
+extern char buff[100];
 
 
 

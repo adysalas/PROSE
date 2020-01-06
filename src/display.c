@@ -8,7 +8,7 @@
 #include "stdio.h"
 #include "communication.h"
 
-char buff[30];
+char buff[100];
 
 
 void displayError(void)
