@@ -10,10 +10,6 @@
 uint16_t ADC1_Addr[8];
 int a = 1;
 
-
-
-
-
 /* State machine states defines */
 #define STATE_FIRST_RUN 0
 #define STATE_REQUEST_SENSOR_DATA 1
@@ -40,6 +36,7 @@ int main(void)
 		stateMachineReloaded();
 
 	} /* While loop end */
+
 
 
 	return 0;

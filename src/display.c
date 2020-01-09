@@ -8,7 +8,19 @@
 #include "stdio.h"
 #include "communication.h"
 
+extern rings _rings[5];
 char buff[100];
+
+void valid(int a, int c)
+{
+	sprintf(buff,"Recebido Anel %d  ---  Cluster %d, \r\n",a,c);
+	for(int a=0; buff[a]!='\0';a++)
+	{
+		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART2, buff[a]);
+		USART_ClearFlag(USART2,USART_FLAG_TXE);
+	}
+}
 
 
 void displayError(void)
@@ -32,6 +44,8 @@ void displayErrorID(int error)
 		USART_ClearFlag(USART2,USART_FLAG_TXE);
 	}
 }
+
+
 
 void sendString(char* string)
 {
@@ -57,12 +71,47 @@ void displayNADA(void)
 	}
 }
 
-void displei(void)
+void mostra_tudo(void)
 {
+//	for(int ringue = 0; ringue<=5; ringue++) { //Para cada anel
+//
+//		sprintf(buff,"Anel %d.\r\n",ringue);
+//		for(int a=0; buff[a]!='\0';a++)
+//		{
+//			while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+//			USART_SendData(USART2, buff[a]);
+//			USART_ClearFlag(USART2,USART_FLAG_TXE);
+//		}
+
+		for(int i=0; i<8;i++) {	//Para cada sensor
+
+			sprintf(buff,"Byte %d --> %d \r\n",i, RxMessage.Data[i]);
+			for(int a=0; buff[a]!='\0';a++)
+			{
+				while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+				USART_SendData(USART2, buff[a]);
+				USART_ClearFlag(USART2,USART_FLAG_TXE);
+			}
+		}
+
+		sprintf(buff,"------------------------------------ \r\n");
+		for(int a=0; buff[a]!='\0';a++)
+		{
+			while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+			USART_SendData(USART2, buff[a]);
+			USART_ClearFlag(USART2,USART_FLAG_TXE);
+		}
+//	}
+}
+
+void displei(int k)
+{
+
 
 	for(int i=0; i<8;i++)
 	{
-		sprintf(buff,"Sensor %d --> %d \r\n",i, RxMessage.Data[i]);
+		//int tete = atoi(_rings[k].sensor_lux);
+		sprintf(buff,"Anel --> %d		 Sensor %d --> %d \r\n",k,i, _rings[k].sensor_lux[i]);
 		for(int a=0; buff[a]!='\0';a++)
 		{
 			while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
@@ -71,13 +120,21 @@ void displei(void)
 		}
 	}
 
-	sprintf(buff,"********************** \r\n");
+	sprintf(buff,"************************************************** \r\n");
 	for(int a=0; buff[a]!='\0';a++)
 	{
 		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
 		USART_SendData(USART2, buff[a]);
 		USART_ClearFlag(USART2,USART_FLAG_TXE);
 	}
+
+//	sprintf(buff,"----------------------- \r\n");
+//	for(int a=0; buff[a]!='\0';a++)
+//	{
+//		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+//		USART_SendData(USART2, buff[a]);
+//		USART_ClearFlag(USART2,USART_FLAG_TXE);
+//	}
 }
 
 void display(float *info)
