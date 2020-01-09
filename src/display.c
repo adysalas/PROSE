@@ -36,7 +36,7 @@ void displayError(void)
 
 void displayErrorID(int error)
 {
-	sprintf(buff,"Wrong ID Speaking on WRONG TIME: %x \r\n",error);
+	sprintf(buff,"**** ID  \"%x\"  Speaking on WRONG TIME ****\r\n",error);
 	for(int a=0; buff[a]!='\0';a++)
 	{
 		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
@@ -73,41 +73,28 @@ void displayNADA(void)
 
 void mostra_tudo(void)
 {
-//	for(int ringue = 0; ringue<=5; ringue++) { //Para cada anel
-//
-//		sprintf(buff,"Anel %d.\r\n",ringue);
-//		for(int a=0; buff[a]!='\0';a++)
-//		{
-//			while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
-//			USART_SendData(USART2, buff[a]);
-//			USART_ClearFlag(USART2,USART_FLAG_TXE);
-//		}
+	for(int i=0; i<8;i++) {	//Para cada sensor
 
-		for(int i=0; i<8;i++) {	//Para cada sensor
-
-			sprintf(buff,"Byte %d --> %d \r\n",i, RxMessage.Data[i]);
-			for(int a=0; buff[a]!='\0';a++)
-			{
-				while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
-				USART_SendData(USART2, buff[a]);
-				USART_ClearFlag(USART2,USART_FLAG_TXE);
-			}
-		}
-
-		sprintf(buff,"------------------------------------ \r\n");
+		sprintf(buff,"Byte %d --> %d \r\n",i, RxMessage.Data[i]);
 		for(int a=0; buff[a]!='\0';a++)
 		{
 			while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
 			USART_SendData(USART2, buff[a]);
 			USART_ClearFlag(USART2,USART_FLAG_TXE);
 		}
-//	}
+	}
+
+	sprintf(buff,"------------------------------------ \r\n");
+	for(int a=0; buff[a]!='\0';a++)
+	{
+		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART2, buff[a]);
+		USART_ClearFlag(USART2,USART_FLAG_TXE);
+	}
 }
 
 void displei(int k)
 {
-
-
 	for(int i=0; i<8;i++)
 	{
 		//int tete = atoi(_rings[k].sensor_lux);
@@ -115,7 +102,7 @@ void displei(int k)
 		for(int a=0; buff[a]!='\0';a++)
 		{
 			while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
-			USART_SendData(USART2, buff[a]);
+			USART_SendData(USART2, (uint8_t)buff[a]);
 			USART_ClearFlag(USART2,USART_FLAG_TXE);
 		}
 	}
@@ -127,21 +114,13 @@ void displei(int k)
 		USART_SendData(USART2, buff[a]);
 		USART_ClearFlag(USART2,USART_FLAG_TXE);
 	}
-
-//	sprintf(buff,"----------------------- \r\n");
-//	for(int a=0; buff[a]!='\0';a++)
-//	{
-//		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
-//		USART_SendData(USART2, buff[a]);
-//		USART_ClearFlag(USART2,USART_FLAG_TXE);
-//	}
 }
 
 void display(float *info)
 {
 	for(int i=0; i<8;i++)
 	{
-		sprintf(buff,"Sensor %d: %.3f \r\n\n",i, *info);
+		sprintf(buff,"Sensor %d: %d \r\n\n",i, *info);
 		for(int a=0; buff[a]!='\0';a++)
 		{
 			while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);

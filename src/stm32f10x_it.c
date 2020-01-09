@@ -12,6 +12,7 @@
 
 int i50ms_Counter;
 int b50ms_Counter;
+int bStartUp = FALSE;
 
 /*******************************************************************************
 * Function Name  : NMIException
@@ -214,6 +215,14 @@ void EXTI0_IRQHandler(void)
 *******************************************************************************/
 void EXTI1_IRQHandler(void)
 {
+
+
+	while(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_1) == Bit_RESET);
+
+	bStartUp = TRUE;
+
+	EXTI_ClearFlag(EXTI_Line1);
+
 }
 
 /*******************************************************************************

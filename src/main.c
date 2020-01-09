@@ -24,16 +24,19 @@ static void initTimers(void);
 
 int main(void)
 {
+
 	RCC_Config_HSI_PLL_64MHz();
 	Init();
 	lcd_init();
 	rcc_lcd_info();
 	Config_Tim();
 	initTimers();
+	configurationInterruptExtPortA();
 
 	while(1)
 	{
-		stateMachineReloaded();
+		//stateMachineReloaded();
+		stateMachineV2();
 
 	} /* While loop end */
 

@@ -16,16 +16,21 @@ void Init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;					//tx
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;					//tx CAN
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;					//rx
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;					//rx CAN
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
+	//Configurate GPIOA1 as INPUT with PULL-UP intern. SW5 DSO BOARD.
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA,&GPIO_InitStructure);
 
     //USART CONFIG
 	NVIC_InitTypeDef NVIC_InitStructure;
@@ -131,4 +136,29 @@ void configurationInterruptTim3()
 	NVIC_Init(&NVIC_InitStructure);
 
 	TIM_ITConfig(TIM3, TIM_IT_Update,ENABLE);
+}
+
+void configurationInterruptExtPortA(void)
+{
+
+	EXTI_InitTypeDef NVIC_InitStructure;
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+
+	NVIC_InitStructure.EXTI_Line = EXTI1_IRQn;
+	NVIC_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	NVIC_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+	NVIC_InitStructure.EXTI_LineCmd = ENABLE;
+
+	EXTI_Init(&NVIC_InitStructure);
+
+	NVIC_InitTypeDef NVIC_InitStructure1;
+//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+	NVIC_InitStructure1.NVIC_IRQChannel = EXTI1_IRQn;
+	NVIC_InitStructure1.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure1.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure1.NVIC_IRQChannelCmd = ENABLE;
+
+	NVIC_Init(&NVIC_InitStructure1);
+
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA,GPIO_PinSource1);
 }

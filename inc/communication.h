@@ -17,8 +17,11 @@
 #define RING3_ID 					(0x03)
 #define RING4_ID 					(0x04)
 #define RING5_ID 					(0x05)
+#define CALIBRATION_ID  			(0x10)
 #define MAX_CAN_TRANSMIT_ATTEMPTS 	(3u)
 #define HOLD_TIME					(125000ul)
+#define CALIBRATION_DATA    		('I')
+#define REQUEST_DATA    			('R')
 
 #define TRUE (1u)
 #define FALSE (0u)
@@ -26,11 +29,14 @@
 #define NULL_SENSOR (0u)
 
 typedef struct ring{
-	float sensor_lux[8];
-	float roll;
+	uint16_t sensor_lux[8];
+	uint16_t higherLux;
+	uint16_t roll;
 	float pitch;
 	int   successfullTransmision;
 }rings;
+
+
 
 
 #define maxAttempts uint8_t
@@ -52,6 +58,17 @@ typedef enum{
 		ROLL_CALC
 }states ;
 
+typedef enum{
+	INIT = 0,
+	RING_1,
+	RING_2,
+	RING_3,
+	RING_4,
+	RING_5,
+	ROLL,
+	PITCH
+}states_v2;
+
 typedef float sensor;
 
 
@@ -66,6 +83,7 @@ extern CanRxMsg RxMessage;
 extern int i50ms_Counter;
 extern int b50ms_Counter;
 extern char buff[100];
+extern int bStartUp;
 
 
 void CAN_Configuration(void);

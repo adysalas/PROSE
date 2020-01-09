@@ -413,6 +413,8 @@ void stateMachineReloaded(void)
 				_rings[2].sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
 				_rings[2].sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 				_rings[2].successfullTransmision = TRUE;
+
+				mostra_tudo();
 			}
 			else
 			{
@@ -474,7 +476,7 @@ void stateMachineReloaded(void)
 				_rings[2].sensor_lux[7] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
 				_rings[2].successfullTransmision = TRUE;
 
-				displei(3);
+				//displei(3);
 				mostra_tudo();
 			}
 			else
@@ -530,13 +532,13 @@ void stateMachineReloaded(void)
 				enteringState = TRUE;
 
 				_rings[3].sensor_lux[0] =  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-//				sprintf(buff,"----------%d------------\r\n",k,i, _rings[3].sensor_lux[0]);
-//				for(int a=0; buff[a]!='\0';a++)
-//				{
-//					while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
-//					USART_SendData(USART2, buff[a]);
-//					USART_ClearFlag(USART2,USART_FLAG_TXE);
-//				}
+				//				sprintf(buff,"----------%d------------\r\n",k,i, _rings[3].sensor_lux[0]);
+				//				for(int a=0; buff[a]!='\0';a++)
+				//				{
+				//					while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+				//					USART_SendData(USART2, buff[a]);
+				//					USART_ClearFlag(USART2,USART_FLAG_TXE);
+				//				}
 				_rings[3].sensor_lux[1] =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
 				_rings[3].sensor_lux[2] =  RxMessage.Data[5] + (RxMessage.Data[4] << 8 );
 				_rings[3].sensor_lux[3] =  RxMessage.Data[7] + (RxMessage.Data[6] << 8 );
@@ -765,6 +767,171 @@ void stateMachineReloaded(void)
 }
 
 
+void stateMachineV2(void)
+{
+	static states_v2 state = INIT;
+	static int enteringState = TRUE;
+	static int exitState = FALSE;
+	states_v2 nextState;
+
+	switch (state)
+	{
+		case INIT:
+		{
+			if (TRUE == enteringState )
+			{
+				enteringState = FALSE;
+				TxMessage.StdId   = CALIBRATION_ID;
+				TxMessage.Data[0] = CALIBRATION_DATA;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 1;
+			}
+
+			if (TRUE == bStartUp)
+			{
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				nextState = RING_1;
+				sprintf(buff,"Calibration Message Sent Successfully \n\r");
+				sendString(buff);
+				exitState = TRUE;
+			}
+
+			if (TRUE == exitState)
+			{
+				state = nextState;
+				enteringState = TRUE;
+			}
+			//char
+		}
+		break;
+		case RING_1:
+		{
+			if (TRUE == enteringState )
+			{
+				displayString(1,TRUE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING1_ID;
+				TxMessage.Data[0] = REQUEST_DATA;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 1;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				//strcpy(TxMessage.Data,"        ");
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				nextState = RING_2;
+				exitState = TRUE;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				_rings[0].roll =  NULL_SENSOR;
+				_rings[0].higherLux =  NULL_SENSOR;
+				_rings[0].successfullTransmision = FALSE;
+
+				sprintf(buff,"***** RING1 NOT RESPONSE IN 50ms ***** \n\r");
+				sendString(buff);
+
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				if (RING1_ID == RxMessage.StdId )
+				{
+
+					_rings[0].roll			=  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+					_rings[0].higherLux     =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+					_rings[0].successfullTransmision = TRUE;
+
+					nextState = RING_2;
+					exitState = TRUE;
+					sprintf(buff,"RING1: Roll-->%u   HigherLux -->%u\n\r",_rings[0].roll,_rings[0].higherLux);
+					sendString(buff);
+				}
+				else
+				{
+					displayErrorID(RxMessage.StdId);
+				}
+			}
+			if (TRUE == exitState)
+			{
+				state = nextState;
+				enteringState = TRUE;
+			}
+		}
+		break;
+		case RING_2:
+		{
+			if (TRUE == enteringState )
+			{
+				displayString(1,TRUE);
+				enteringState = FALSE;
+				TxMessage.StdId   = RING2_ID;
+				TxMessage.Data[0] = REQUEST_DATA;
+				TxMessage.RTR     = CAN_RTR_DATA;
+				TxMessage.DLC     = 1;
+
+				CAN_Transmit(CAN1, &TxMessage);//transmit
+				//strcpy(TxMessage.Data,"        ");
+				b50ms_Counter = FALSE;
+				i50ms_Counter = 0;
+			}
+
+			while ((CAN_MessagePending(CAN1,CAN_FIFO0) == 0) && (FALSE == b50ms_Counter));
+
+			if (TRUE == b50ms_Counter )
+			{
+				nextState = RING_3;
+				exitState = TRUE;
+				b50ms_Counter = FALSE;
+				enteringState = TRUE;
+
+				_rings[0].roll =  NULL_SENSOR;
+				_rings[0].higherLux =  NULL_SENSOR;
+				_rings[0].successfullTransmision = FALSE;
+
+				sprintf(buff,"***** RING1 NOT RESPONSE IN 50ms ***** \n\r");
+				sendString(buff);
+
+			}
+			else
+			{
+				CAN_Receive(CAN1,CAN_FIFO0,&RxMessage);
+				if (RING1_ID == RxMessage.StdId )
+				{
+
+					_rings[1].roll			=  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+					_rings[1].higherLux     =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+					_rings[1].successfullTransmision = TRUE;
+
+					nextState = RING_3;
+					exitState = TRUE;
+					sprintf(buff,"RING1: Roll-->%u   HigherLux -->%u\n\r",_rings[1].roll,_rings[1].higherLux);
+					sendString(buff);
+				}
+				else
+				{
+					displayErrorID(RxMessage.StdId);
+				}
+			}
+			if (TRUE == exitState)
+			{
+				state = nextState;
+				enteringState = TRUE;
+			}
+		}
+		break;
+
+	default:
+		break;
+	}
+}
+
 static void delay(void)
 {
 	for (int i=0;i<1500000;i++);
@@ -870,7 +1037,7 @@ float compute_roll(rings *sensor,int *validsRoll)
 
 
 	sprintf(buff,"Angulo: %f\n\r", roll);
-	//sendString(&buff);
+	sendString(&buff);
 
 	return roll;
 }
@@ -880,4 +1047,5 @@ float compute_pitch(rings *sensor)
 	float pitch;
 
 	return pitch;
+
 }
