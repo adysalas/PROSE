@@ -26,7 +26,8 @@
 #define TRUE (1u)
 #define FALSE (0u)
 
-#define NULL_SENSOR (0u)
+#define NULL_SENSOR 				(0u)
+#define NULL_ROLL   				(65535u)
 
 typedef struct ring{
 	uint16_t sensor_lux[8];
@@ -96,6 +97,7 @@ void stateMachineReloaded(void);
 
 float compute_pitch(rings *sensor);
 float compute_roll(rings *sensor,int *validsRoll);
+float rollValue(rings *sensor,int numberOfSensor,int *validRolls);
 
 
 #endif /* COMMUNICATION_H_ */

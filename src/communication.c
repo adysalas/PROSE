@@ -798,6 +798,7 @@ void stateMachineV2(void)
 
 			if (TRUE == exitState)
 			{
+				exitState = FALSE;
 				state = nextState;
 				enteringState = TRUE;
 			}
@@ -830,7 +831,7 @@ void stateMachineV2(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				_rings[0].roll =  NULL_SENSOR;
+				_rings[0].roll =  NULL_ROLL;
 				_rings[0].higherLux =  NULL_SENSOR;
 				_rings[0].successfullTransmision = FALSE;
 
@@ -860,6 +861,7 @@ void stateMachineV2(void)
 			}
 			if (TRUE == exitState)
 			{
+				exitState = FALSE;
 				state = nextState;
 				enteringState = TRUE;
 			}
@@ -891,9 +893,9 @@ void stateMachineV2(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				_rings[0].roll =  NULL_SENSOR;
-				_rings[0].higherLux =  NULL_SENSOR;
-				_rings[0].successfullTransmision = FALSE;
+				_rings[1].roll =  NULL_ROLL;
+				_rings[1].higherLux =  NULL_SENSOR;
+				_rings[1].successfullTransmision = FALSE;
 
 				sprintf(buff,"***** RING2 NOT RESPONSE IN 50ms ***** \n\r");
 				sendString(buff);
@@ -921,6 +923,7 @@ void stateMachineV2(void)
 			}
 			if (TRUE == exitState)
 			{
+				exitState = FALSE;
 				state = nextState;
 				enteringState = TRUE;
 			}
@@ -952,9 +955,9 @@ void stateMachineV2(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				_rings[0].roll =  NULL_SENSOR;
-				_rings[0].higherLux =  NULL_SENSOR;
-				_rings[0].successfullTransmision = FALSE;
+				_rings[2].roll =  NULL_ROLL;
+				_rings[2].higherLux =  NULL_SENSOR;
+				_rings[2].successfullTransmision = FALSE;
 
 				sprintf(buff,"***** RING3 NOT RESPONSE IN 50ms ***** \n\r");
 				sendString(buff);
@@ -966,9 +969,9 @@ void stateMachineV2(void)
 				if (RING1_ID == RxMessage.StdId )
 				{
 
-					_rings[1].roll			=  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-					_rings[1].higherLux     =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-					_rings[1].successfullTransmision = TRUE;
+					_rings[2].roll			=  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+					_rings[2].higherLux     =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+					_rings[2].successfullTransmision = TRUE;
 
 					nextState = RING_4;
 					exitState = TRUE;
@@ -982,6 +985,7 @@ void stateMachineV2(void)
 			}
 			if (TRUE == exitState)
 			{
+				exitState = FALSE;
 				state = nextState;
 				enteringState = TRUE;
 			}
@@ -1013,9 +1017,9 @@ void stateMachineV2(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				_rings[0].roll =  NULL_SENSOR;
-				_rings[0].higherLux =  NULL_SENSOR;
-				_rings[0].successfullTransmision = FALSE;
+				_rings[3].roll =  NULL_ROLL;
+				_rings[3].higherLux =  NULL_SENSOR;
+				_rings[3].successfullTransmision = FALSE;
 
 				sprintf(buff,"***** RING4 NOT RESPONSE IN 50ms ***** \n\r");
 				sendString(buff);
@@ -1027,9 +1031,9 @@ void stateMachineV2(void)
 				if (RING1_ID == RxMessage.StdId )
 				{
 
-					_rings[1].roll			=  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-					_rings[1].higherLux     =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-					_rings[1].successfullTransmision = TRUE;
+					_rings[3].roll			=  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+					_rings[3].higherLux     =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+					_rings[3].successfullTransmision = TRUE;
 
 					nextState = RING_5;
 					exitState = TRUE;
@@ -1043,6 +1047,7 @@ void stateMachineV2(void)
 			}
 			if (TRUE == exitState)
 			{
+				exitState = FALSE;
 				state = nextState;
 				enteringState = TRUE;
 			}
@@ -1074,9 +1079,9 @@ void stateMachineV2(void)
 				b50ms_Counter = FALSE;
 				enteringState = TRUE;
 
-				_rings[0].roll =  NULL_SENSOR;
-				_rings[0].higherLux =  NULL_SENSOR;
-				_rings[0].successfullTransmision = FALSE;
+				_rings[4].roll =  NULL_ROLL;
+				_rings[4].higherLux =  NULL_SENSOR;
+				_rings[4].successfullTransmision = FALSE;
 
 				sprintf(buff,"***** RING5 NOT RESPONSE IN 50ms ***** \n\r");
 				sendString(buff);
@@ -1088,9 +1093,9 @@ void stateMachineV2(void)
 				if (RING1_ID == RxMessage.StdId )
 				{
 
-					_rings[1].roll			=  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
-					_rings[1].higherLux     =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
-					_rings[1].successfullTransmision = TRUE;
+					_rings[4].roll			=  RxMessage.Data[1] + (RxMessage.Data[0] << 8 );
+					_rings[4].higherLux     =  RxMessage.Data[3] + (RxMessage.Data[2] << 8 );
+					_rings[4].successfullTransmision = TRUE;
 
 					nextState = ROLL;
 					exitState = TRUE;
@@ -1104,6 +1109,53 @@ void stateMachineV2(void)
 			}
 			if (TRUE == exitState)
 			{
+				exitState = FALSE;
+				state = nextState;
+				enteringState = TRUE;
+			}
+		}
+		break;
+		case ROLL:
+		{
+			int validRolls = 0;
+			if (TRUE == enteringState )
+			{
+				enteringState = FALSE;
+				sprintf(buff,"//// ROLL CALCULATION \\\\\\\\ \n\r");
+				sendString(buff);
+			}
+				
+			for (int i=0;i<5;i++)
+			{
+				rollGeral += rollValue(&_rings[i],i,&validRolls);
+			}
+
+			rollGeral /= validRolls;
+			exitState = TRUE;
+			nextState = PITCH;
+			
+			if (TRUE == exitState)
+			{
+				exitState = FALSE;
+				state = nextState;
+				enteringState = TRUE;
+			}
+		}
+		break;
+		case PITCH:
+		{
+			int validRolls = 0;
+			if (TRUE == enteringState )
+			{
+				enteringState = FALSE;
+				sprintf(buff,"//// PITCH CALCULATION \\\\\\\\ \n\r");
+				sendString(buff);
+			}
+			
+
+			if (TRUE == exitState)
+			{
+				exitState = FALSE;
 				state = nextState;
 				enteringState = TRUE;
 			}
@@ -1120,6 +1172,24 @@ static void delay(void)
 	for (int i=0;i<1500000;i++);
 }
 
+float rollValue(rings *sensor,int numberOfSensor,int *validRolls)
+{
+	float roll = 0;
+
+	if (0 == numberOfSensor || 1 == numberOfSensor || 3 == numberOfSensor || 4 == numberOfSensor)
+	{
+		if (NULL_ROLL == sensor->roll)
+		{
+			return 0;
+		}
+		else
+		{
+			(*validRolls)++;
+			return sensor->roll;
+		}
+			
+	}
+}
 
 float compute_roll(rings *sensor,int *validsRoll)
 {
