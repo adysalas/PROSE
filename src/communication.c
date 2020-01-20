@@ -1152,7 +1152,11 @@ void stateMachineV2(void)
 				sendString(buff);
 			}
 			
-
+			/*
+			 * TODO: CALCULATE PITCH with the rest of values and with the actual "PITCH"
+			 */
+			nextState = RING_1;
+			exitState = TRUE;
 			if (TRUE == exitState)
 			{
 				exitState = FALSE;
