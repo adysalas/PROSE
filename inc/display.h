@@ -11,7 +11,6 @@
 extern char buff[100];
 
 
-
 void sendString(char* string);
 void displayError(void);
 void displayNADA(void);
@@ -22,5 +21,6 @@ void displayErrorID(int error);
 void mostra_tudo(void);
 void display_luxs(void);
 void valid(int a, int c);
+
 
 #endif /* DISPLAY_H_ */

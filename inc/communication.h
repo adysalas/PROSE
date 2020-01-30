@@ -11,6 +11,7 @@
 #include "stm32f10x.h"
 #include "stm32f10x_can.h"
 #include "time.h"
+#include <math.h>
 
 #define RING1_ID 					(0x01)
 #define RING2_ID 					(0x02)
@@ -29,11 +30,17 @@
 #define NULL_SENSOR 				(0u)
 #define NULL_ROLL   				(65535u)
 
+#define PI							3.14159265
+#define NUMBER_OF_RINGS				5
+
+
 typedef struct ring{
 	uint16_t sensor_lux[8];
 	uint16_t higherLux;
 	uint16_t roll;
-	float pitch;
+	uint16_t lux_0m;
+	uint16_t lux_1m;
+	uint16_t lux_ref;
 	int   successfullTransmision;
 }rings;
 
@@ -61,6 +68,8 @@ typedef enum{
 
 typedef enum{
 	INIT = 0,
+	/*CALIB_UP,
+	CALIB_DOWN,*/
 	RING_1,
 	RING_2,
 	RING_3,
@@ -85,6 +94,8 @@ extern int i50ms_Counter;
 extern int b50ms_Counter;
 extern char buff[100];
 extern int bStartUp;
+extern int calibUp;
+extern int calibDown;
 
 
 void CAN_Configuration(void);
@@ -96,8 +107,10 @@ void CAN_CleanRxBuffer(void);
 void stateMachineReloaded(void);
 
 float compute_pitch(rings *sensor);
-float compute_roll(rings *sensor,int *validsRoll);
+float cmpt_roll_avrg(void);
 float rollValue(rings *sensor,int numberOfSensor,int *validRolls);
+void calibration(int cimaBaixo);
 
 
 #endif /* COMMUNICATION_H_ */
+

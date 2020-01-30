@@ -134,7 +134,7 @@ void display(float *info)
 void displayString(int value,int cluster)
 {
 	if (TRUE == cluster)
-		sprintf(buff,"Sensor %i Cluster 1 pedido \r\n\n", value);
+		sprintf(buff,"Anel %i pedido \r\n\n", value);
 	else
 		sprintf(buff,"Sensor %i Cluster 2 pedido \r\n\n", value);
 	for(int a=0; buff[a]!='\0';a++)
