@@ -12,7 +12,7 @@ rings _rings[5];
 uint64_t tic = 0;
 uint64_t toc = 0;
 int b5seg=0;
-
+int calibrationStage = 0;
 float rollGeral;
 float pitchGeral;
 
@@ -557,7 +557,17 @@ void stateMachineV2(void)
 		/*
 		 * TODO: CALCULATE PITCH with the rest of values and with the actual "PITCH"
 		 */
-		nextState = RING_1;
+		if (2 > calibrationStage)
+		{
+			nextState = RING_1;
+
+		}
+		else
+		{
+			nextState = INIT;
+			calibrationStage++;
+		}
+		
 		exitState = TRUE;
 		if (TRUE == exitState)
 		{
