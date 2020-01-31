@@ -32,6 +32,7 @@ int main(void)
 	Config_Tim();
 	initTimers();
 	configurationInterruptExtPortA();
+	configurationADC();
 
 	while(1)
 	{

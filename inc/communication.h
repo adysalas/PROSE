@@ -76,7 +76,8 @@ typedef enum{
 	RING_4,
 	RING_5,
 	ROLL,
-	PITCH
+	PITCH,
+	INIT_ACCELEROMETER
 }states_v2;
 
 typedef float sensor;
@@ -96,6 +97,7 @@ extern char buff[100];
 extern int bStartUp;
 extern int calibUp;
 extern int calibDown;
+extern int b5seg;
 
 
 void CAN_Configuration(void);
@@ -110,6 +112,8 @@ float compute_pitch(rings *sensor);
 float cmpt_roll_avrg(void);
 float rollValue(rings *sensor,int numberOfSensor,int *validRolls);
 void calibration(int cimaBaixo);
+void calibrationADC(void);
+void readDMA(void);
 
 
 #endif /* COMMUNICATION_H_ */

@@ -162,3 +162,46 @@ void configurationInterruptExtPortA(void)
 
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA,GPIO_PinSource1);
 }
+
+
+void configurationADC(void)
+{
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE); // Enable RCC to GPIOC
+	/*	Clock ADC */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1,ENABLE);
+
+	/* AHB */
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOC,&GPIO_InitStructure);
+
+	RCC_ADCCLKConfig(RCC_PCLK2_Div6);
+	ADC_InitTypeDef ADC_InitStructure;
+
+	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;//ADC_Mode_Independent
+	ADC_InitStructure.ADC_ScanConvMode = ENABLE;// DISABLE PARA UN SOLO CANAL, ENABLE PARA VARIOS.
+	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+	ADC_InitStructure.ADC_NbrOfChannel = 3;
+
+	ADC_Init(ADC1,&ADC_InitStructure);
+
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_7Cycles5); // Z
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_7Cycles5); // Y
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_12, 3, ADC_SampleTime_7Cycles5); // X
+
+	ADC_DMACmd(ADC1, ENABLE);
+
+	ADC_Cmd(ADC1, ENABLE);
+
+	ADC_ResetCalibration(ADC1);
+	while(ADC_GetResetCalibrationStatus(ADC1));
+	ADC_StartCalibration(ADC1);
+	while(ADC_GetCalibrationStatus(ADC1));
+
+}

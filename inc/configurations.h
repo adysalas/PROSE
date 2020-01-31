@@ -19,6 +19,7 @@ void Init(void);
 void show(int info);
 void state_MachineMain(void);
 void configurationInterruptExtPortA(void);
+void configurationADC(void);
 
 
 

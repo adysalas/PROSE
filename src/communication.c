@@ -11,6 +11,7 @@ rings ring1,ring2,ring3,ring4,ring5;
 rings _rings[5];
 uint64_t tic = 0;
 uint64_t toc = 0;
+int b5seg=0;
 
 float rollGeral;
 float pitchGeral;
@@ -21,6 +22,16 @@ int calibUp = FALSE;
 int calibDown = FALSE;
 
 static void delay(void);
+
+float valueADCpotenciometroPC01;
+float valueADCpotenciometroPC02;
+float valueADCpotenciometroPC03;
+float gx,gxx;
+float gy,gyy;
+float gz,gzz;
+long int ADC_MAX_X=0,ADC_MAX_Y=0,ADC_MAX_Z=0;
+long int ADC_MIN_X=4095,ADC_MIN_Y=4095,ADC_MIN_Z=4095;
+uint16_t ADC1ConvertedValue[3];
 
 
 void CAN_Configuration(void)
@@ -123,13 +134,47 @@ void CAN_CleanRxBuffer(void)
 
 void stateMachineV2(void)
 {
-	static states_v2 state = INIT;
+	static states_v2 state = INIT_ACCELEROMETER;
 	static int enteringState = TRUE;
 	static int exitState = FALSE;
 	states_v2 nextState;
 
 	switch (state)
 	{
+
+	case INIT_ACCELEROMETER:
+	{
+		if (TRUE == enteringState )
+		{
+			enteringState = FALSE;
+		}
+
+		if (TRUE == bStartUp)
+		{
+			
+			sprintf(buff,"Calibration of ADC Accelerometer \n\r");
+			sendString(buff);
+			if (FALSE == b5seg )
+			{
+				calibration();
+			}
+			else
+			{
+				exitState = TRUE;
+				nextState = INIT;
+			}
+			
+			
+		}
+
+		if (TRUE == exitState)
+		{
+			bStartUp = FALSE;
+			exitState = FALSE;
+			state = nextState;
+			enteringState = TRUE;
+		}	
+	}
 	case INIT:
 	{
 		if (TRUE == enteringState )
@@ -159,28 +204,6 @@ void stateMachineV2(void)
 		//char
 	}
 	break;
-	/*case CALIB_UP:
-	{
-		if (TRUE == enteringState )
-		{
-			enteringState = FALSE;
-		}
-
-		if (TRUE == calibUp)
-		{
-			calibration(1);
-			exitState = TRUE;
-		}
-
-		if (TRUE == exitState)
-		{
-			exitState = FALSE;
-			state = nextState;
-			enteringState = TRUE;
-		}
-		//char
-	}
-	break;*/
 	case RING_1:
 	{
 		if (TRUE == enteringState )
@@ -527,7 +550,10 @@ void stateMachineV2(void)
 			sprintf(buff,"//// PITCH CALCULATION \\\\\\\\ \n\r");
 			sendString(buff);
 		}
-
+		/**
+		 * 
+		 * */
+		readDMA();
 		/*
 		 * TODO: CALCULATE PITCH with the rest of values and with the actual "PITCH"
 		 */
@@ -606,4 +632,59 @@ float cmpt_roll_avrg(void)
 
 	return (valD * atan2( (yTotal / NUMBER_OF_RINGS) , (xTotal / NUMBER_OF_RINGS)));
 
+}
+
+
+void readDMA(void)
+{
+	while(!DMA_GetFlagStatus(DMA1_FLAG_TC1));
+	DMA_ClearFlag(DMA1_FLAG_TC1);
+	/* Convert each value readed on ADC1 by the DMA into Voltages Value usint the relationship Vread=ADCreaded*(3.3V/4095)
+		* Where 3.3v is the Voltage Reference used by the uC.
+		* 4095 is the max value that can give us the ADC with a resolution of 2^12
+		*/
+	valueADCpotenciometroPC01 = ADC1ConvertedValue[0] * (3.3 / 4095);
+	valueADCpotenciometroPC02 = ADC1ConvertedValue[1] * (3.3 / 4095);
+	valueADCpotenciometroPC03 = ADC1ConvertedValue[2] * (3.3 / 4095);
+
+	/*
+		* Convertion of Voltage values into G forces.
+		*/
+	gx = valorG1(ADC1ConvertedValue[2],ADC_MIN_X,ADC_MAX_X,SCALE_NEGATIVE,SCALE_POSITIVE);
+	gy = valorG1(ADC1ConvertedValue[1],ADC_MIN_Y,ADC_MAX_Y,SCALE_NEGATIVE,SCALE_POSITIVE);
+	gz = valorG1(ADC1ConvertedValue[0],ADC_MIN_Z,ADC_MAX_Z,SCALE_NEGATIVE,SCALE_POSITIVE);
+}
+
+void calibrationADC(void)
+{
+	while(!DMA_GetFlagStatus(DMA1_FLAG_TC1));
+	DMA_ClearFlag(DMA1_FLAG_TC1);
+
+	if (ADC1ConvertedValue[0] > ADC_MAX_Z)
+	{
+		ADC_MAX_Z = ADC1ConvertedValue[0];
+	}
+
+	if (ADC1ConvertedValue[0] < ADC_MIN_Z)
+	{
+		ADC_MIN_Z = ADC1ConvertedValue[0];
+	}
+	if (ADC1ConvertedValue[1] > ADC_MAX_Y)
+	{
+		ADC_MAX_Y = ADC1ConvertedValue[1];
+	}
+
+	if (ADC1ConvertedValue[1] < ADC_MIN_Y)
+	{
+		ADC_MIN_Y = ADC1ConvertedValue[1];
+	}
+	if (ADC1ConvertedValue[2] > ADC_MAX_X)
+	{
+		ADC_MAX_X = ADC1ConvertedValue[2];
+	}
+
+	if (ADC1ConvertedValue[2] < ADC_MIN_X)
+	{
+		ADC_MIN_X = ADC1ConvertedValue[2];
+	}
 }
