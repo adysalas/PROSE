@@ -15,6 +15,7 @@ void Init(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;					//tx CAN
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -56,8 +57,8 @@ void Init(void)
 
 void RCC_Config_HSI_PLL_64MHz() //HSI com PLL a frequencia maxima
 {
-	//Reset às configuracões
-	RCC_DeInit(); //Faz reset ao sistema e coloca a configuraccao por omissão
+	//Reset Ã s configuracÃµes
+	RCC_DeInit(); //Faz reset ao sistema e coloca a configuraccao por omissÃ£o
 
 	//Ativar Fonte
 	RCC_HSICmd(ENABLE); //Ativar a HSI
@@ -69,7 +70,7 @@ void RCC_Config_HSI_PLL_64MHz() //HSI com PLL a frequencia maxima
 	FLASH_SetLatency(FLASH_Latency_2);
 
 	//Configurar os prescalers AHB, APB1 e APB2, respetivamente
-	RCC_HCLKConfig(RCC_SYSCLK_Div1);//divisor unitario que é o divisor mais baixo possivel
+	RCC_HCLKConfig(RCC_SYSCLK_Div1);//divisor unitario que Ã© o divisor mais baixo possivel
 	RCC_PCLK1Config(RCC_HCLK_Div2); //PCLK1 no valor maximo possivel, ou seja, colocar o divisor minimo possivel
 	RCC_PCLK2Config(RCC_HCLK_Div1); //PCLK2 no valor maximo possivel, ou seja, colocar o divisor minimo possivel
 
@@ -95,9 +96,9 @@ void configurationTimer()
 {
 	// para 2HZ .. ARR=20.10^3 PSC= 179
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	TIM_TimeBaseStructure.TIM_Period = 20000; //auto-reload 0 at ́e 65535
+	TIM_TimeBaseStructure.TIM_Period = 20000; //auto-reload 0 at Ì�e 65535
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-	TIM_TimeBaseStructure.TIM_Prescaler = 1790; //prescaler de 0 at ́e 65535 TIM
+	TIM_TimeBaseStructure.TIM_Prescaler = 1790; //prescaler de 0 at Ì�e 65535 TIM
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
@@ -114,9 +115,9 @@ void configurationTimeToggle()
 	TIM_OCStructInit(&TIM_OCInitStructure1);
 
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	TIM_TimeBaseStructure.TIM_Period = 554; //auto-reload 0 at ́e 65535
+	TIM_TimeBaseStructure.TIM_Period = 554; //auto-reload 0 at Ì�e 65535
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-	TIM_TimeBaseStructure.TIM_Prescaler = 65000; //prescaler de 0 at ́e 65535 TIM
+	TIM_TimeBaseStructure.TIM_Prescaler = 65000; //prescaler de 0 at Ì�e 65535 TIM
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
 	TIM_Cmd(TIM3, ENABLE);
@@ -166,20 +167,8 @@ void configurationInterruptExtPortA(void)
 
 void configurationADC(void)
 {
-
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE); // Enable RCC to GPIOC
-	/*	Clock ADC */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1,ENABLE);
-
-	/* AHB */
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOC,&GPIO_InitStructure);
-
 	RCC_ADCCLKConfig(RCC_PCLK2_Div6);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
 	ADC_InitTypeDef ADC_InitStructure;
 
 	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;//ADC_Mode_Independent

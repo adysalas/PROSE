@@ -220,7 +220,7 @@ void EXTI1_IRQHandler(void)
 	while(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_1) == Bit_RESET);
 
 	bStartUp = TRUE;
-  b5seg = 0;
+	b5seg = 0;
 /*s
 	while(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_10) == Bit_RESET);
 
@@ -493,7 +493,7 @@ void TIM3_IRQHandler(void)
 	if(iCounterMseg > 50)
 	{
 
-		b100mSec = 1;
+//		b100mSec = 1;
 		iCounterMseg = 0;
 		ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 	}

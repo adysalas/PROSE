@@ -145,6 +145,18 @@ void displayString(int value,int cluster)
 	}
 }
 
+
+void print_roll(float r_media, float r_absoluto, float r_erro)
+{
+	sprintf(buff,"Media dos roll --> %f \nRoll absoluto --> %f\n Erro Roll --> %f\r\n\n", r_media, r_absoluto, r_erro);
+	for(int a=0; buff[a]!='\0';a++)
+	{
+		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART2, buff[a]);
+		USART_ClearFlag(USART2,USART_FLAG_TXE);
+	}
+}
+
 void displayString2(int value)
 {
 	sprintf(buff,"Sensor %i_1 pedido \r\n\n", value);

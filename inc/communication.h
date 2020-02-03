@@ -33,6 +33,17 @@
 #define PI							3.14159265
 #define NUMBER_OF_RINGS				5
 
+#define ADC1_DR_Address    ((uint32_t)0x4001244C)
+#define ZERO_X  1.5 //
+#define ZERO_Y  1.5 //
+#define ZERO_Z  1.5 //
+#define SENSIBILIDAD 0.3 // sensibilidad del sensor.
+#define ADC1_DR_Address    ((uint32_t)0x4001244C)
+#define MAX_ADC_READ 4095
+#define MIN_ADC_READ 0
+#define SCALE_NEGATIVE -3
+#define SCALE_POSITIVE 3
+#define DIST_MAX (10.0)
 
 typedef struct ring{
 	uint16_t sensor_lux[8];
@@ -68,6 +79,7 @@ typedef enum{
 
 typedef enum{
 	INIT = 0,
+	INIT_ACCELEROMETER,
 	/*CALIB_UP,
 	CALIB_DOWN,*/
 	RING_1,
@@ -76,8 +88,7 @@ typedef enum{
 	RING_4,
 	RING_5,
 	ROLL,
-	PITCH,
-	INIT_ACCELEROMETER
+	PITCH
 }states_v2;
 
 typedef float sensor;
@@ -108,13 +119,16 @@ void CAN_CleanRxBuffer(void);
 
 void stateMachineReloaded(void);
 
-float compute_pitch(rings *sensor);
+float compute_pitch();
 float cmpt_roll_avrg(void);
 float rollValue(rings *sensor,int numberOfSensor,int *validRolls);
 void calibration(int cimaBaixo);
 void calibrationADC(void);
+float valorG1(float ADCread, float minADC, float maxADC, float gMin, float gMax);
 void readDMA(void);
+void roli(void);
 
+void accel_Setup();
 
 #endif /* COMMUNICATION_H_ */
 

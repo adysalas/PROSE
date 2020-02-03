@@ -38,6 +38,7 @@ int main(void)
 	{
 		//stateMachineReloaded();
 		stateMachineV2();
+		//roli();
 
 	} /* While loop end */
 

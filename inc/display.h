@@ -21,6 +21,7 @@ void displayErrorID(int error);
 void mostra_tudo(void);
 void display_luxs(void);
 void valid(int a, int c);
+void print_roll(float r_media, float r_absoluto, float r_erro);
 
 
 #endif /* DISPLAY_H_ */

@@ -12,7 +12,6 @@ rings _rings[5];
 uint64_t tic = 0;
 uint64_t toc = 0;
 int b5seg=0;
-int calibrationStage = 0;
 float rollGeral;
 float pitchGeral;
 
@@ -134,47 +133,15 @@ void CAN_CleanRxBuffer(void)
 
 void stateMachineV2(void)
 {
-	static states_v2 state = INIT_ACCELEROMETER;
+	static int calibrationStage = 0;
+	static states_v2 state = INIT;
 	static int enteringState = TRUE;
 	static int exitState = FALSE;
 	states_v2 nextState;
+	static int startUp = TRUE;
 
 	switch (state)
 	{
-
-	case INIT_ACCELEROMETER:
-	{
-		if (TRUE == enteringState )
-		{
-			enteringState = FALSE;
-		}
-
-		if (TRUE == bStartUp)
-		{
-			
-			sprintf(buff,"Calibration of ADC Accelerometer \n\r");
-			sendString(buff);
-			if (FALSE == b5seg )
-			{
-				calibration();
-			}
-			else
-			{
-				exitState = TRUE;
-				nextState = INIT;
-			}
-			
-			
-		}
-
-		if (TRUE == exitState)
-		{
-			bStartUp = FALSE;
-			exitState = FALSE;
-			state = nextState;
-			enteringState = TRUE;
-		}	
-	}
 	case INIT:
 	{
 		if (TRUE == enteringState )
@@ -186,14 +153,31 @@ void stateMachineV2(void)
 			TxMessage.DLC     = 1;
 		}
 
-		if (TRUE == bStartUp)
-		{
-			CAN_Transmit(CAN1, &TxMessage);//transmit
-			nextState = RING_1;
-			sprintf(buff,"Calibration Message Sent Successfully \n\r");
-			sendString(buff);
-			exitState = TRUE;
-		}
+
+			if (TRUE == startUp)
+			{
+				if (TRUE == bStartUp)
+				{
+					CAN_Transmit(CAN1, &TxMessage);//transmit
+					startUp = FALSE;
+					sprintf(buff,"Calibration Message Sent Successfully \n\r");
+					nextState = RING_1;
+					sendString(buff);
+					exitState = TRUE;
+				}
+			}
+			else
+			{
+				if (TRUE == bStartUp)
+				{
+					sprintf(buff,"Press button to continue calibration \n\r");
+					nextState = RING_1;
+					sendString(buff);
+					exitState = TRUE;
+				}
+			}
+
+
 
 		if (TRUE == exitState)
 		{
@@ -524,12 +508,8 @@ void stateMachineV2(void)
 			sendString(buff);
 		}
 
-		for (int i=0;i<5;i++)
-		{
-			rollGeral += rollValue(&_rings[i],i,&validRolls);
-		}
+		rollGeral = cmpt_roll_avrg();
 
-		rollGeral /= validRolls;
 		exitState = TRUE;
 		nextState = PITCH;
 
@@ -553,11 +533,31 @@ void stateMachineV2(void)
 		/**
 		 * 
 		 * */
-		readDMA();
+		if (0 == calibrationStage)
+		{
+			_rings[0].lux_0m = _rings[0].higherLux;
+			_rings[4].lux_0m = _rings[4].higherLux;
+
+		}
+		else if ( 1 == calibrationStage)
+		{
+			_rings[0].lux_1m = _rings[0].higherLux;
+			_rings[4].lux_1m = _rings[4].higherLux;
+
+			_rings[0].lux_ref = _rings[0].lux_0m - _rings[0].lux_1m;
+			_rings[4].lux_ref = _rings[4].lux_0m - _rings[4].lux_1m;
+
+
+		}
+
+		compute_pitch();
+		//readDMA();
 		/*
 		 * TODO: CALCULATE PITCH with the rest of values and with the actual "PITCH"
 		 */
-		if (2 > calibrationStage)
+
+
+		if (1 < calibrationStage)
 		{
 			nextState = RING_1;
 
@@ -620,9 +620,22 @@ void calibration(int cimaBaixo)
 }
 
 
-float compute_pitch(rings *sensor)
+float compute_pitch()
 {
-	float pitch;
+	float dist1=0,dist2=0;
+	float pitch =0;
+
+	dist1 = (_rings[0].higherLux*1)/_rings[0].lux_ref;
+	dist2 = (_rings[4].higherLux*1)/_rings[4].lux_ref;
+
+	if (dist1 > dist2)
+	{
+		pitch = (-1)*(tan(dist1-dist2/DIST_MAX));
+	}
+	else
+	{
+		pitch = tan(dist2-dist1/DIST_MAX);
+	}
 
 	return pitch;
 }
@@ -633,14 +646,21 @@ float cmpt_roll_avrg(void)
 	float xTotal, yTotal;
 	float valR = PI / 180;
 	float valD = 180 / PI;
+	int validRolls = 0;
 
 	//	Convert from polar to cartesian and add them all
-	for (int i=0; i<5; i++) {
-		xTotal += cos(valR *_rings[i].roll);
-		yTotal += sin(valR *_rings[i].roll);
+	for (int i=0; i<5; i++)
+	{
+		if (NULL_ROLL != _rings[i].roll )
+		{
+			validRolls++;
+			xTotal += cos(valR *_rings[i].roll);
+			yTotal += sin(valR *_rings[i].roll);
+		}
+
 	}
 
-	return (valD * atan2( (yTotal / NUMBER_OF_RINGS) , (xTotal / NUMBER_OF_RINGS)));
+	return (valD * atan2( (yTotal / validRolls) , (xTotal / validRolls)));
 
 }
 
